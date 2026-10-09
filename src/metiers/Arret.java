@@ -68,4 +68,9 @@ public class Arret {
 
         this.lesPerturbations = new ArrayList<>();
     }
+
+    @Override
+    public String toString() {
+        return nomArret;
+    }
 }

@@ -3,7 +3,7 @@ package metiers;
 public class Ligne {
     private int id;
     private String libelle;
-    private char hexColor;
+    private String hexColor;
     private Arret TerminusDepart;
     private Arret TerminusArrivee;
     private TypeTransport typeTransport;
@@ -24,11 +24,11 @@ public class Ligne {
         this.libelle = libelle;
     }
 
-    public char getHexColor() {
+    public String getHexColor() {
         return hexColor;
     }
 
-    public void setHexColor(char hexColor) {
+    public void setHexColor(String hexColor) {
         this.hexColor = hexColor;
     }
 
@@ -56,12 +56,17 @@ public class Ligne {
         this.typeTransport = typeTransport;
     }
 
-    public Ligne(int id, String libelle, char hexColor, Arret terminusDepart, Arret terminusArrivee, TypeTransport typeTransport) {
+    public Ligne(int id, String libelle, String hexColor, Arret terminusDepart, Arret terminusArrivee, TypeTransport typeTransport) {
         this.id = id;
         this.libelle = libelle;
         this.hexColor = hexColor;
         TerminusDepart = terminusDepart;
         TerminusArrivee = terminusArrivee;
         this.typeTransport = typeTransport;
+    }
+
+    @Override
+    public String toString() {
+        return libelle + ", Depart= " + TerminusDepart + ", Arrivee= " + TerminusArrivee;
     }
 }
