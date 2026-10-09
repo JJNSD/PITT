@@ -1,0 +1,72 @@
+package metiers;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Perturbation {
+    private int id;
+    private String libelle;
+
+    // être perturbé
+    private LocalDateTime dateHeureDebut;
+    private LocalDateTime dateHeureFin;
+    private List<Arret> arretsPerturbes;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getLibelle() {
+        return libelle;
+    }
+
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
+    }
+
+    public LocalDateTime getDateHeureDebut() {
+        return dateHeureDebut;
+    }
+
+    public void setDateHeureDebut(LocalDateTime dateHeureDebut) {
+        this.dateHeureDebut = dateHeureDebut;
+    }
+
+    public LocalDateTime getDateHeureFin() {
+        return dateHeureFin;
+    }
+
+    public void setDateHeureFin(LocalDateTime dateHeureFin) {
+        this.dateHeureFin = dateHeureFin;
+    }
+
+    public List<Arret> getArretsPerturbes() {
+        return arretsPerturbes;
+    }
+
+    public boolean arretPresent(Arret arret) {
+        return this.arretsPerturbes.stream()
+                .anyMatch(a -> a.getId() == arret.getId());
+    }
+
+    public void ajouterUnArretPerturbe(Arret arret) {
+        this.arretsPerturbes.add(arret);
+        if (arretPresent(arret)) {
+            arret.ajouterPerturbation(this);
+        }
+    }
+
+    public Perturbation(int id, String libelle, LocalDateTime dateHeureDebut, LocalDateTime dateHeureFin) {
+        this.id = id;
+        this.libelle = libelle;
+        this.dateHeureDebut = dateHeureDebut;
+        this.dateHeureFin = dateHeureFin;
+
+        this.arretsPerturbes = new ArrayList<>();
+    }
+}
