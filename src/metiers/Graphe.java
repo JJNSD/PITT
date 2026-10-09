@@ -26,7 +26,7 @@ public class Graphe {
 
         leGraphe.get(depart).put(arrivee,new ArrayList<>());
         leGraphe.get(depart).get(arrivee).add(new HashMap<>());
-        leGraphe.get(depart).get(arrivee).get(0).put(ligne,score);
+        leGraphe.get(depart).get(arrivee).get(leGraphe.get(depart).get(arrivee).size()-1).put(ligne,score);
     }
 
     public void ajouterCheminMAJSiExistant(Arret depart, Arret arrivee, Ligne ligne, int score) {
@@ -69,7 +69,7 @@ public class Graphe {
     }
 
     // Algos de recherche
-    public int bfs(String depart, String arrivee) {
+    public int bfs(Arret depart, Arret arrivee) {
         return 0;
     }
 }
