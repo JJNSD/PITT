@@ -1,12 +1,13 @@
 package metiers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Graphe {
-    private Map<Arret, Map<Arret, List<Map<Ligne,Integer>>>> leGraphe;
+    private final int coutCorrespondance = 1;
+
+    private Map<Arret, Map<Arret, Map<Ligne,Integer>>> leGraphe;
 
     public Graphe() {
         leGraphe = new HashMap<>();
@@ -24,18 +25,13 @@ public class Graphe {
             ajouterSommet(arrivee);
         }
 
-        leGraphe.get(depart).put(arrivee,new ArrayList<>());
-        leGraphe.get(depart).get(arrivee).add(new HashMap<>());
-        leGraphe.get(depart).get(arrivee).get(leGraphe.get(depart).get(arrivee).size()-1).put(ligne,score);
+        leGraphe.get(depart).put(arrivee,new HashMap<>());
+        leGraphe.get(depart).get(arrivee).put(ligne,score);
     }
 
     public void ajouterCheminMAJSiExistant(Arret depart, Arret arrivee, Ligne ligne, int score) {
-        if (this.leGraphe.containsKey(depart) && this.leGraphe.get(depart).containsKey(arrivee)) {
-            for (Map<Ligne,Integer> data : this.leGraphe.get(depart).get(arrivee)) {
-                if (data.containsKey(ligne)) {
-                    data.replace(ligne, score);
-                }
-            }
+        if (leGraphe.containsKey(depart) && leGraphe.get(depart).containsKey(arrivee) && leGraphe.get(depart).get(arrivee).containsKey(ligne)) {
+            leGraphe.get(depart).get(arrivee).replace(ligne, score);
         } else {
             ajouterChemin(depart, arrivee, ligne, score);
         }
@@ -69,7 +65,29 @@ public class Graphe {
     }
 
     // Algos de recherche
+
+    /**
+     * Calcul la distance directe entre 2 arrêts.
+     * @param depart l'arrêt de départ
+     * @param arrivee l'arrêt d'arrivé
+     * @param ligne la ligne sur laquelle on navigue
+     * @return distance entre 2 arrêts voisins, -1 sinon
+     */
+    public int distanceVoisin(Arret depart, Arret arrivee, Ligne ligne) {
+        if (leGraphe.containsKey(depart) && leGraphe.get(depart).containsKey(arrivee) && leGraphe.get(depart).get(arrivee).containsKey(ligne)) {
+            return leGraphe.get(depart).get(arrivee).get(ligne);
+        } else {
+            return -1;
+        }
+    }
+
     public int bfs(Arret depart, Arret arrivee) {
+        return 0;
+    }
+
+    public int djikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
+
+
         return 0;
     }
 }
