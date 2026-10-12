@@ -8,6 +8,7 @@ public class TestGraphe {
 
         // Type de la ligne de Test
         TypeTransport bus = new TypeTransport(1, "Bus", (float) 1.70);
+        TypeTransport tram = new TypeTransport(1, "Tram", (float) 1.70);
 
         // Création d'une ligne et de ses arrêts
         Arret a1 = new Arret(1,  "Michelet", (float) 47.463532, (float) -0.545509);
@@ -20,9 +21,18 @@ public class TestGraphe {
 
         Ligne l1 = new Ligne(1, "Ligne 1", "FFFFFF", a1, a7, bus);
 
+        Arret a10 = new Arret(10,  "Les Gares", (float) 47.463532, (float) -0.545509);
+        Arret a11 = new Arret(11,  "Ralliement", (float) 47.463532, (float) -0.545509);
+        Arret a12 = new Arret(12,  "Molière", (float) 47.463532, (float) -0.545509);
+        Arret a13 = new Arret(13,  "Doutre Maine", (float) 47.463532, (float) -0.545509);
+        Arret a14 = new Arret(14,  "Le Quai", (float) 47.463532, (float) -0.545509);
+        Arret a15 = new Arret(15,  "Farcy", (float) 47.463532, (float) -0.545509);
+
+        Ligne l2 = new Ligne(1, "Ligne C", "000000", a10, a15, tram);
+
         // Création des chemins
 
-        // Aller
+        // Aller L1
         g.ajouterCheminMAJSiExistant(a1, a2, l1, 5);
         g.ajouterCheminMAJSiExistant(a2, a3, l1, 1);
         g.ajouterCheminMAJSiExistant(a3, a4, l1, 0);
@@ -30,12 +40,28 @@ public class TestGraphe {
         g.ajouterCheminMAJSiExistant(a5, a6, l1, 1);
         g.ajouterCheminMAJSiExistant(a6, a7, l1, 0);
 
-        // Retour
+        // Retour L1
         g.ajouterCheminMAJSiExistant(a7, a6, l1, 0);
         g.ajouterCheminMAJSiExistant(a6, a5, l1, 1);
         g.ajouterCheminMAJSiExistant(a5, a4, l1, 1);
         g.ajouterCheminMAJSiExistant(a4, a2, l1, 1);
         g.ajouterCheminMAJSiExistant(a2, a1, l1, 1);
+
+        // Aller C
+        g.ajouterCheminMAJSiExistant(a10, a4, l2, 2);
+        g.ajouterCheminMAJSiExistant(a4, a6, l2, 2);
+        g.ajouterCheminMAJSiExistant(a6, a11, l2, 1);
+        g.ajouterCheminMAJSiExistant(a11, a12, l2, 1);
+        g.ajouterCheminMAJSiExistant(a12, a13, l2, 3);
+        g.ajouterCheminMAJSiExistant(a14, a15, l2, 2);
+
+        // Retour C
+        g.ajouterCheminMAJSiExistant(a4, a10, l2, 2);
+        g.ajouterCheminMAJSiExistant(a6, a4, l2, 2);
+        g.ajouterCheminMAJSiExistant(a11, a6, l2, 1);
+        g.ajouterCheminMAJSiExistant(a12, a11, l2, 1);
+        g.ajouterCheminMAJSiExistant(a13, a12, l2, 3);
+        g.ajouterCheminMAJSiExistant(a15, a14, l2, 2);
 
         System.out.println(g);
 
