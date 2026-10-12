@@ -1,8 +1,14 @@
 package metiers;
 
+import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 public class Graphe {
     private final int coutCorrespondance = 1;
@@ -82,7 +88,42 @@ public class Graphe {
     }
 
     public int bfs(Arret depart, Arret arrivee) {
-        return 0;
+        List<Arret> chemin = cheminBfs(depart, arrivee);
+        return chemin.size();
+    }
+
+    public List<Arret> cheminBfs(Arret depart, Arret arrivee) {
+        if (depart == null || arrivee == null || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
+            return null;
+        }
+
+        Queue<Arret> file = new ArrayDeque<>();
+        Set<Arret> visites = new HashSet<>();
+        Map<Arret, Arret> predecesseurs = new HashMap<>();
+
+        file.add(depart);
+        visites.add(depart);
+
+        while (!file.isEmpty()) {
+            Arret courant = file.poll();
+            if (courant.equals(arrivee)) {
+                LinkedList<Arret> chemin = new LinkedList<>();
+                Arret arret = arrivee;
+                chemin.addFirst(arret);
+                while (!arret.equals(depart)) {
+                    arret = predecesseurs.get(arret);
+                    chemin.addFirst(arret);
+                }
+                return chemin;
+            }
+            for (Arret voisin : leGraphe.get(courant).keySet()) {
+                if (visites.add(voisin)) {
+                    predecesseurs.put(voisin, courant);
+                    file.add(voisin);
+                }
+            }
+        }
+        return null;
     }
 
     public int djikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {

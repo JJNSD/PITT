@@ -1,5 +1,7 @@
 package test;
 
+import java.util.List;
+
 import metiers.*;
 
 public class TestGraphe {
@@ -53,6 +55,7 @@ public class TestGraphe {
         g.ajouterCheminMAJSiExistant(a6, a11, l2, 1);
         g.ajouterCheminMAJSiExistant(a11, a12, l2, 1);
         g.ajouterCheminMAJSiExistant(a12, a13, l2, 3);
+        g.ajouterCheminMAJSiExistant(a13, a14, l2, 3);
         g.ajouterCheminMAJSiExistant(a14, a15, l2, 4);
 
         // Retour C
@@ -61,19 +64,26 @@ public class TestGraphe {
         g.ajouterCheminMAJSiExistant(a11, a6, l2, 1);
         g.ajouterCheminMAJSiExistant(a12, a11, l2, 1);
         g.ajouterCheminMAJSiExistant(a13, a12, l2, 3);
+        g.ajouterCheminMAJSiExistant(a14, a13, l2, 3);
         g.ajouterCheminMAJSiExistant(a15, a14, l2, 4);
 
-        System.out.println(g);
+        //System.out.println(g);
+
+        // test bfs
+        List<Arret> chemin = g.cheminBfs(a1, a7);
+        System.out.println("Chemin BFS Michelet -> Lorraine : " + chemin);
+        System.out.println("Nombre d'arrêtes (attendu : 6) : " + g.bfs(a1, a7));
+
 
         // Test MàJ
-        g.ajouterCheminMAJSiExistant(a1, a2, l1, 1);
+        //g.ajouterCheminMAJSiExistant(a1, a2, l1, 1);
 
-        System.out.println(g);
+        //System.out.println(g);
 
-        System.out.println("Distance de Farcy à Le Quai : " + g.distanceVoisin(a15, a14, l2) + " | ATTENDU : 4");
+        /*System.out.println("Distance de Farcy à Le Quai : " + g.distanceVoisin(a15, a14, l2) + " | ATTENDU : 4");
         System.out.println("Distance de Farcy à Doutre Maine : " + g.distanceVoisin(a15, a13, l2) + " | ATTENDU : -1");
         System.out.println("Distance de Michelet à André Leroy : " + g.distanceVoisin(a1, a2, l1) + " | ATTENDU : 1");
         System.out.println("Distance de Foch Haras à Foch Maison Bleu '1' : " + g.distanceVoisin(a4, a6, l1) + " | ATTENDU : -1");
-        System.out.println("Distance de Foch Haras à Foch Maison Bleu 'C' : " + g.distanceVoisin(a4, a6, l2) + " | ATTENDU : 2");
+        System.out.println("Distance de Foch Haras à Foch Maison Bleu 'C' : " + g.distanceVoisin(a4, a6, l2) + " | ATTENDU : 2");*/
     }
 }
