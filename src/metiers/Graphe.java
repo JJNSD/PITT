@@ -87,11 +87,12 @@ public class Graphe {
         }
     }
 
-    public int bfs(Arret depart, Arret arrivee) {
-        List<Arret> chemin = cheminBfs(depart, arrivee);
-        return chemin.size();
-    }
-
+    /**
+     * Utilise l'algorithme BFS pour calculer un chemin entre 2 arrêts
+     * @param depart
+     * @param arrivee
+     * @return Chemin avec le nombre d'arrêts le plus court
+     */
     public List<Arret> cheminBfs(Arret depart, Arret arrivee) {
         if (depart == null || arrivee == null || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
             return null;
@@ -126,9 +127,11 @@ public class Graphe {
         return null;
     }
 
-    public int djikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
+    public List<Arret> cheminDjikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
+        List<Arret> chemin = new ArrayList<>();
 
 
-        return 0;
+
+        return chemin;
     }
 }
