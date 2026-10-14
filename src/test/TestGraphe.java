@@ -80,11 +80,15 @@ public class TestGraphe {
         System.out.println("Distance de Michelet à André Leroy : " + g.distanceVoisin(a1, a2, l1) + " | ATTENDU : 1");
         System.out.println("Distance de Foch Haras à Foch Maison Bleu '1' : " + g.distanceVoisin(a4, a6, l1) + " | ATTENDU : -1");
         System.out.println("Distance de Foch Haras à Foch Maison Bleu 'C' : " + g.distanceVoisin(a4, a6, l2) + " | ATTENDU : 2");*/
+
         // test bfs
         List<Arret> chemin = g.cheminBfs(a1, a7);
         System.out.println("Chemin BFS Michelet -> Lorraine : " + chemin);
-        System.out.println("Nombre d'arrêtes (attendu : 6) : " + g.bfs(a1, a7));
 
+        List<Arret> chemin2 = g.cheminBfs(a7, a1);
+        System.out.println("Chemin BFS Lorraine -> Michelet : " + chemin2);
+
+        // test djikstra
         List<Arret> cheminAStar = g.cheminAStar(a1, a7, null);
         System.out.println(
                 "Chemin A* Michelet -> Lorraine : " + cheminAStar
