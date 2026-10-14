@@ -2,6 +2,7 @@ package metiers;
 
 import java.util.*;
 
+
 public class Graphe {
     private final int coutCorrespondance = 1;
 
@@ -119,138 +120,123 @@ public class Graphe {
         return null;
     }
 
-    /**
-     * Recherche un chemin de cout minimal entre deux arrets.
-     * Utilise une recherche de type A* avec une heuristique nulle.
-     *
-     * @param depart arret de depart
-     * @param arrivee arret d'arrivee
-     * @param lesLignes lignes autorisees ; null ou vide = toutes
-     * @return chemin de cout minimal, ou null si aucun chemin
-     */
-    public List<Arret> cheminAStar(
-            Arret depart,
-            Arret arrivee,
-            List<Ligne> lesLignes) {
+    /** A* avec un coef calcule automatiquement (admissible et coherent). */
+    public List<Arret> cheminAStar(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
+        return cheminPlusCourt(depart, arrivee, lesLignes, coefficientAdmissible(lesLignes));
+    }
 
+    /** Dijkstra : heuristique nulle. */
+    public List<Arret> cheminDjikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
+        return cheminPlusCourt(depart, arrivee, lesLignes, 0);
+    }
+
+    /**
+     * coef = min sur les aretes autorisees de (score / distance a vol d'oiseau).
+     * Heuristique admissible et coherente.
+     */
+    public double coefficientAdmissible(List<Ligne> lesLignes) {
+        double coef = Double.MAX_VALUE;
+        for (Map.Entry<Arret, Map<Arret, Map<Ligne, Integer>>> e : leGraphe.entrySet()) {
+            for (Map.Entry<Arret, Map<Ligne, Integer>> f : e.getValue().entrySet()) {
+                double d = haversine(e.getKey(), f.getKey());
+                if (d <= 0) {
+                    continue;
+                }
+                for (Map.Entry<Ligne, Integer> c : f.getValue().entrySet()) {
+                    boolean autorisee = lesLignes == null || lesLignes.isEmpty() || lesLignes.contains(c.getKey());
+                    if (autorisee && c.getValue() >= 0) {
+                        coef = Math.min(coef, c.getValue() / d);
+                    }
+                }
+            }
+        }
+        return coef == Double.MAX_VALUE ? 0 : coef;
+    }
+
+    /**
+     * Coeur commun Dijkstra / A*.
+     * Un sommet est retire de la file AVANT que son fScore change
+     */
+    private List<Arret> cheminPlusCourt(Arret depart, Arret arrivee, List<Ligne> lesLignes, double coef) {
         if (depart == null || arrivee == null
-                || !leGraphe.containsKey(depart)
-                || !leGraphe.containsKey(arrivee)) {
+                || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
             return null;
         }
 
-        // Cout minimal connu depuis le depart
         Map<Arret, Integer> gScore = new HashMap<>();
-
-        // Predecesseur de chaque arret
+        Map<Arret, Double> fScore = new HashMap<>();
         Map<Arret, Arret> predecesseurs = new HashMap<>();
 
-        // File prioritaire : le plus petit cout est traite en premier
         PriorityQueue<Arret> file = new PriorityQueue<>(
-                Comparator.comparingInt(
-                        arret -> gScore.getOrDefault(
-                                arret, Integer.MAX_VALUE
-                        )
-                )
-        );
-
-        Set<Arret> visites = new HashSet<>();
+                Comparator.comparingDouble(a -> fScore.getOrDefault(a, Double.MAX_VALUE)));
 
         gScore.put(depart, 0);
+        fScore.put(depart, heuristique(depart, arrivee, coef));
         file.add(depart);
 
         while (!file.isEmpty()) {
-
             Arret courant = file.poll();
 
-            // Ignorer les arrets deja traites
-            if (!visites.add(courant)) {
-                continue;
-            }
-
-            // Arrivee atteinte : reconstruire le chemin
             if (courant.equals(arrivee)) {
                 LinkedList<Arret> chemin = new LinkedList<>();
                 Arret arret = arrivee;
-
                 chemin.addFirst(arret);
-
                 while (!arret.equals(depart)) {
                     arret = predecesseurs.get(arret);
-
                     if (arret == null) {
                         return null;
                     }
-
                     chemin.addFirst(arret);
                 }
-
                 return chemin;
             }
 
-            // Explorer les voisins
-            for (Arret voisin : leGraphe.get(courant).keySet()) {
+            for (Map.Entry<Arret, Map<Ligne, Integer>> v : leGraphe.get(courant).entrySet()) {
+                Arret voisin = v.getKey();
 
-                Map<Ligne, Integer> connexions =
-                        leGraphe.get(courant).get(voisin);
-
-                // Chercher le poids minimal parmi les lignes autorisees
+                // poids minimal parmi les lignes autorisees
                 int coutTrajet = Integer.MAX_VALUE;
-
-                for (Map.Entry<Ligne, Integer> connexion
-                        : connexions.entrySet()) {
-
-                    Ligne ligne = connexion.getKey();
-                    int poids = connexion.getValue();
-
-                    boolean ligneAutorisee =
-                            lesLignes == null
-                                    || lesLignes.isEmpty()
-                                    || lesLignes.contains(ligne);
-
-                    if (ligneAutorisee && poids >= 0) {
-                        coutTrajet = Math.min(coutTrajet, poids);
+                for (Map.Entry<Ligne, Integer> c : v.getValue().entrySet()) {
+                    boolean autorisee = lesLignes == null || lesLignes.isEmpty() || lesLignes.contains(c.getKey());
+                    if (autorisee && c.getValue() >= 0) {
+                        coutTrajet = Math.min(coutTrajet, c.getValue());
                     }
                 }
-
-                // Aucune connexion autorisee
                 if (coutTrajet == Integer.MAX_VALUE) {
                     continue;
                 }
 
-                long nouveauCout =
-                        (long) gScore.get(courant) + coutTrajet;
-
-                // Eviter un depassement de capacite d'un int
+                long nouveauCout = (long) gScore.get(courant) + coutTrajet;
                 if (nouveauCout > Integer.MAX_VALUE) {
                     continue;
                 }
 
-                int coutActuel = gScore.getOrDefault(
-                        voisin, Integer.MAX_VALUE
-                );
-
-                if (nouveauCout < coutActuel) {
-
+                if (nouveauCout < gScore.getOrDefault(voisin, Integer.MAX_VALUE)) {
+                    file.remove(voisin); // AVANT de modifier fScore
                     gScore.put(voisin, (int) nouveauCout);
+                    fScore.put(voisin, nouveauCout + heuristique(voisin, arrivee, coef));
                     predecesseurs.put(voisin, courant);
-
-                    // Le voisin peut etre reconsidere
-                    visites.remove(voisin);
-                    file.remove(voisin);
                     file.add(voisin);
                 }
             }
         }
-
         return null;
     }
 
-    public List<Arret> cheminDjikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
-        List<Arret> chemin = new ArrayList<>();
-
-
-
-        return chemin;
+    // Distance a vol d'oiseau (Haversine) en km
+    private double haversine(Arret a, Arret b) {
+        double R = 6372.8;
+        double dLat = Math.toRadians(b.getLattitude() - a.getLattitude());
+        double dLon = Math.toRadians(b.getLongitude() - a.getLongitude());
+        double h = Math.pow(Math.sin(dLat / 2), 2)
+                + Math.pow(Math.sin(dLon / 2), 2)
+                * Math.cos(Math.toRadians(a.getLattitude()))
+                * Math.cos(Math.toRadians(b.getLattitude()));
+        return 2 * R * Math.asin(Math.sqrt(h));
     }
+
+    private double heuristique(Arret depart, Arret arrivee, double coef) {
+        return coef == 0 ? 0 : haversine(depart, arrivee) * coef;
+    }
+
 }

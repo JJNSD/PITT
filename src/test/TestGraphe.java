@@ -1,5 +1,6 @@
 package test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import metiers.*;
@@ -51,7 +52,7 @@ public class TestGraphe {
 
         // Aller C
         g.ajouterCheminMAJSiExistant(a10, a4, l2, 4);
-        g.ajouterCheminMAJSiExistant(a4, a6, l2, 2);
+        g.ajouterCheminMAJSiExistant(a4, a6, l2, 8);
         g.ajouterCheminMAJSiExistant(a6, a11, l2, 1);
         g.ajouterCheminMAJSiExistant(a11, a12, l2, 1);
         g.ajouterCheminMAJSiExistant(a12, a13, l2, 3);
@@ -89,10 +90,11 @@ public class TestGraphe {
         System.out.println("Chemin BFS Lorraine -> Michelet : " + chemin2);
 
         // test djikstra
-        List<Arret> cheminAStar = g.cheminAStar(a1, a7, null);
-        System.out.println(
-                "Chemin A* Michelet -> Lorraine : " + cheminAStar
-        );
+
+        System.out.println("Dijkstra Michelet -> Lorraine : " + g.cheminDjikstra(a1, a7, null));
+
+
+        System.out.println("A* Michelet -> Lorraine : " + g.cheminAStar(a1, a7, null));
 
     }
 }
