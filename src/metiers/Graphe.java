@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 public class Graphe {
     private final int coutCorrespondance = 1;
@@ -124,6 +126,133 @@ public class Graphe {
                 }
             }
         }
+        return null;
+    }
+
+    /**
+     * Recherche un chemin de cout minimal entre deux arrets.
+     * Utilise une recherche de type A* avec une heuristique nulle.
+     *
+     * @param depart arret de depart
+     * @param arrivee arret d'arrivee
+     * @param lesLignes lignes autorisees ; null ou vide = toutes
+     * @return chemin de cout minimal, ou null si aucun chemin
+     */
+    public List<Arret> cheminAStar(
+            Arret depart,
+            Arret arrivee,
+            List<Ligne> lesLignes) {
+
+        if (depart == null || arrivee == null
+                || !leGraphe.containsKey(depart)
+                || !leGraphe.containsKey(arrivee)) {
+            return null;
+        }
+
+        // Cout minimal connu depuis le depart
+        Map<Arret, Integer> gScore = new HashMap<>();
+
+        // Predecesseur de chaque arret
+        Map<Arret, Arret> predecesseurs = new HashMap<>();
+
+        // File prioritaire : le plus petit cout est traite en premier
+        PriorityQueue<Arret> file = new PriorityQueue<>(
+                Comparator.comparingInt(
+                        arret -> gScore.getOrDefault(
+                                arret, Integer.MAX_VALUE
+                        )
+                )
+        );
+
+        Set<Arret> visites = new HashSet<>();
+
+        gScore.put(depart, 0);
+        file.add(depart);
+
+        while (!file.isEmpty()) {
+
+            Arret courant = file.poll();
+
+            // Ignorer les arrets deja traites
+            if (!visites.add(courant)) {
+                continue;
+            }
+
+            // Arrivee atteinte : reconstruire le chemin
+            if (courant.equals(arrivee)) {
+                LinkedList<Arret> chemin = new LinkedList<>();
+                Arret arret = arrivee;
+
+                chemin.addFirst(arret);
+
+                while (!arret.equals(depart)) {
+                    arret = predecesseurs.get(arret);
+
+                    if (arret == null) {
+                        return null;
+                    }
+
+                    chemin.addFirst(arret);
+                }
+
+                return chemin;
+            }
+
+            // Explorer les voisins
+            for (Arret voisin : leGraphe.get(courant).keySet()) {
+
+                Map<Ligne, Integer> connexions =
+                        leGraphe.get(courant).get(voisin);
+
+                // Chercher le poids minimal parmi les lignes autorisees
+                int coutTrajet = Integer.MAX_VALUE;
+
+                for (Map.Entry<Ligne, Integer> connexion
+                        : connexions.entrySet()) {
+
+                    Ligne ligne = connexion.getKey();
+                    int poids = connexion.getValue();
+
+                    boolean ligneAutorisee =
+                            lesLignes == null
+                                    || lesLignes.isEmpty()
+                                    || lesLignes.contains(ligne);
+
+                    if (ligneAutorisee && poids >= 0) {
+                        coutTrajet = Math.min(coutTrajet, poids);
+                    }
+                }
+
+                // Aucune connexion autorisee
+                if (coutTrajet == Integer.MAX_VALUE) {
+                    continue;
+                }
+
+                long nouveauCout =
+                        (long) gScore.get(courant) + coutTrajet;
+
+                // Eviter un depassement de capacite d'un int
+                if (nouveauCout > Integer.MAX_VALUE) {
+                    continue;
+                }
+
+                int coutActuel = gScore.getOrDefault(
+                        voisin, Integer.MAX_VALUE
+                );
+
+                if (nouveauCout < coutActuel) {
+
+                    gScore.put(voisin, (int) nouveauCout);
+                    predecesseurs.put(voisin, courant);
+
+                    // Le voisin peut etre reconsidere
+                    visites.remove(voisin);
+                    file.remove(voisin);
+                    file.add(voisin);
+                }
+            }
+        }
+
         return null;
     }
 
