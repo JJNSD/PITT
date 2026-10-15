@@ -62,15 +62,12 @@ public class TypeHoraireDAO {
         }
     }
 
-    public int insertTypeHoraire(TypeHoraire horaire) throws Exception {
-        String query = "INSERT INTO \"pitt-bdd\".typehoraire (libelle) VALUES (?) RETURNING idtypehoraire";
+    public boolean insertTypeHoraire(TypeHoraire horaire) throws Exception {
+        String query = "INSERT INTO \"pitt-bdd\".typehoraire (libelle) VALUES (?)";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, horaire.getLibelle());
 
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt("idtypehoraire");
-            }
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             System.err.println("ERREUR BDD lors de l'insertion du type d'horaire '" + horaire.getLibelle() + "'. Détails:");
             e.printStackTrace();

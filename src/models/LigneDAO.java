@@ -96,8 +96,8 @@ public class LigneDAO {
         }
     }
 
-    public int insertLigne(Ligne ligne) throws Exception {
-        String query = "INSERT INTO \"pitt-bdd\".ligne (libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee) VALUES (?, ?, ?, ?, ?) RETURNING idligne";
+    public boolean insertLigne(Ligne ligne) throws Exception {
+        String query = "INSERT INTO \"pitt-bdd\".ligne (libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, ligne.getLibelle());
             ps.setString(2, ligne.getHexColor());
@@ -105,10 +105,7 @@ public class LigneDAO {
             ps.setInt(4, ligne.getTerminusDepart().getId());
             ps.setInt(5, ligne.getTerminusArrivee().getId());
 
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt("idligne");
-            }
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             System.err.println("ERREUR BDD lors de l'insertion de la ligne '" + ligne.getLibelle() + "'. Détails:");
             e.printStackTrace();

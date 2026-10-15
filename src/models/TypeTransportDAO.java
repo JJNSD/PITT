@@ -63,16 +63,13 @@ public class TypeTransportDAO {
         }
     }
 
-    public int insertTypeTransport(TypeTransport transport) throws Exception {
-        String query = "INSERT INTO \"pitt-bdd\".typetransport (libelletypetransport, cout) VALUES (?, ?) RETURNING idtypetransport";
+    public boolean insertTypeTransport(TypeTransport transport) throws Exception {
+        String query = "INSERT INTO \"pitt-bdd\".typetransport (libelletypetransport, cout) VALUES (?, ?)";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, transport.getNomType());
             ps.setFloat(2, transport.getCout());
 
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt("idtypetransport");
-            }
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             System.err.println("ERREUR BDD lors de l'insertion du type de transport '" + transport.getNomType() + "'. Détails:");
             e.printStackTrace();
