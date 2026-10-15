@@ -93,9 +93,12 @@ public class TestGraphe {
         System.out.println("Dijkstra Michelet -> Lorraine : " + g.cheminDjikstra(a1, a7, null));
         System.out.println("Dijkstra Lorraine -> Michelet : " + g.cheminDjikstra(a7, a1, null));
 
-
         System.out.println("A* Michelet -> Lorraine : " + g.cheminAStar(a1, a7, null));
         System.out.println("A* Lorraine -> Michelet : " + g.cheminDjikstra(a7, a1, null));
 
+        // Tests correspondance
+        System.out.println("Djikstra Ralliement -> Les Gares : " + g.cheminDjikstra(a11, a10, null));
+
+        System.out.println("Djikstra Ralliement -> André Leroy : " + g.cheminDjikstra(a11, a2, null));
     }
 }
