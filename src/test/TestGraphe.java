@@ -83,18 +83,19 @@ public class TestGraphe {
         System.out.println("Distance de Foch Haras à Foch Maison Bleu 'C' : " + g.distanceVoisin(a4, a6, l2) + " | ATTENDU : 2");*/
 
         // test bfs
-        List<Arret> chemin = g.cheminBfs(a1, a7);
+        List<List<Object>> chemin = g.cheminBfs(a1, a7);
+        List<List<Object>> chemin2 = g.cheminBfs(a7, a1);
         System.out.println("Chemin BFS Michelet -> Lorraine : " + chemin);
-
-        List<Arret> chemin2 = g.cheminBfs(a7, a1);
         System.out.println("Chemin BFS Lorraine -> Michelet : " + chemin2);
 
         // test djikstra
 
         System.out.println("Dijkstra Michelet -> Lorraine : " + g.cheminDjikstra(a1, a7, null));
+        System.out.println("Dijkstra Lorraine -> Michelet : " + g.cheminDjikstra(a7, a1, null));
 
 
         System.out.println("A* Michelet -> Lorraine : " + g.cheminAStar(a1, a7, null));
+        System.out.println("A* Lorraine -> Michelet : " + g.cheminDjikstra(a7, a1, null));
 
     }
 }

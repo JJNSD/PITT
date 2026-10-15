@@ -63,37 +63,27 @@ public class Graphe {
         return  affichage;
     }
 
-    // Algos de recherche
+    // ---------------- Algos de recherche ----------------
 
-    /**
-     * Calcul la distance directe entre 2 arrêts.
-     * @param depart l'arrêt de départ
-     * @param arrivee l'arrêt d'arrivé
-     * @param ligne la ligne sur laquelle on navigue
-     * @return distance entre 2 arrêts voisins, -1 sinon
-     */
     public int distanceVoisin(Arret depart, Arret arrivee, Ligne ligne) {
-        if (leGraphe.containsKey(depart) && leGraphe.get(depart).containsKey(arrivee) && leGraphe.get(depart).get(arrivee).containsKey(ligne)) {
+        if (leGraphe.containsKey(depart)
+                && leGraphe.get(depart).containsKey(arrivee)
+                && leGraphe.get(depart).get(arrivee).containsKey(ligne)) {
             return leGraphe.get(depart).get(arrivee).get(ligne);
-        } else {
-            return -1;
         }
+        return -1;
     }
 
-    /**
-     * Utilise l'algorithme BFS pour calculer un chemin entre 2 arrêts
-     * @param depart
-     * @param arrivee
-     * @return Chemin avec le nombre d'arrêts le plus court
-     */
-    public List<Arret> cheminBfs(Arret depart, Arret arrivee) {
-        if (depart == null || arrivee == null || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
+    public List<List<Object>> cheminBfs(Arret depart, Arret arrivee) {
+        if (depart == null || arrivee == null
+                || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
             return null;
         }
 
         Queue<Arret> file = new ArrayDeque<>();
         Set<Arret> visites = new HashSet<>();
         Map<Arret, Arret> predecesseurs = new HashMap<>();
+        Map<Arret, Ligne> lignesUtilisees = new HashMap<>();
 
         file.add(depart);
         visites.add(depart);
@@ -101,18 +91,31 @@ public class Graphe {
         while (!file.isEmpty()) {
             Arret courant = file.poll();
             if (courant.equals(arrivee)) {
-                LinkedList<Arret> chemin = new LinkedList<>();
+                LinkedList<List<Object>> chemin = new LinkedList<>();
                 Arret arret = arrivee;
-                chemin.addFirst(arret);
                 while (!arret.equals(depart)) {
+                    chemin.addFirst(Arrays.asList(arret, lignesUtilisees.get(arret)));
                     arret = predecesseurs.get(arret);
-                    chemin.addFirst(arret);
                 }
+                chemin.addFirst(Arrays.asList(depart, null));
                 return chemin;
             }
-            for (Arret voisin : leGraphe.get(courant).keySet()) {
+            for (Map.Entry<Arret, Map<Ligne, Integer>> v : leGraphe.get(courant).entrySet()) {
+                Arret voisin = v.getKey();
                 if (visites.add(voisin)) {
                     predecesseurs.put(voisin, courant);
+
+                    // ligne la moins chere entre courant et voisin
+                    Ligne meilleure = null;
+                    int min = Integer.MAX_VALUE;
+                    for (Map.Entry<Ligne, Integer> c : v.getValue().entrySet()) {
+                        if (c.getValue() >= 0 && c.getValue() < min) {
+                            min = c.getValue();
+                            meilleure = c.getKey();
+                        }
+                    }
+                    lignesUtilisees.put(voisin, meilleure);
+
                     file.add(voisin);
                 }
             }
@@ -120,14 +123,14 @@ public class Graphe {
         return null;
     }
 
-    /** A* avec un coef calcule automatiquement (admissible et coherent). */
-    public List<Arret> cheminAStar(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
-        return cheminPlusCourt(depart, arrivee, lesLignes, coefficientAdmissible(lesLignes));
+    /** Dijkstra : heuristique nulle. */
+    public List<List<Object>> cheminDjikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
+        return cheminPlusCourt(depart, arrivee, lesLignes, 0);
     }
 
-    /** Dijkstra : heuristique nulle. */
-    public List<Arret> cheminDjikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
-        return cheminPlusCourt(depart, arrivee, lesLignes, 0);
+    /** A* avec un coef calcule automatiquement (admissible et coherent). */
+    public List<List<Object>> cheminAStar(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
+        return cheminPlusCourt(depart, arrivee, lesLignes, coefficientAdmissible(lesLignes));
     }
 
     /**
@@ -154,69 +157,74 @@ public class Graphe {
     }
 
     /**
-     * Coeur commun Dijkstra / A*.
-     * Un sommet est retire de la file AVANT que son fScore change
+     * Coeur commun Dijkstra / A* avec cout de correspondance :
+     * changer de ligne a un arret ajoute coutCorrespondance.
+     *
+     * Un etat est un couple Arrays.asList(arret, ligne) : ligne = ligne utilisee pour
+     * arriver a l'arret (null au depart). Arrays.asList a un equals/hashCode corrects
+     * et accepte null, donc il sert de cle dans les Map et dans la file.
+     *
+     * @return liste d'etapes [arret, ligne] du depart a l'arrivee, ou null
      */
-    private List<Arret> cheminPlusCourt(Arret depart, Arret arrivee, List<Ligne> lesLignes, double coef) {
+    private List<List<Object>> cheminPlusCourt(Arret depart, Arret arrivee, List<Ligne> lesLignes, double coef) {
         if (depart == null || arrivee == null
                 || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
             return null;
         }
 
-        Map<Arret, Integer> gScore = new HashMap<>();
-        Map<Arret, Double> fScore = new HashMap<>();
-        Map<Arret, Arret> predecesseurs = new HashMap<>();
+        Map<List<Object>, Integer> gScore = new HashMap<>();
+        Map<List<Object>, Double> fScore = new HashMap<>();
+        Map<List<Object>, List<Object>> predecesseurs = new HashMap<>();
 
-        PriorityQueue<Arret> file = new PriorityQueue<>(
-                Comparator.comparingDouble(a -> fScore.getOrDefault(a, Double.MAX_VALUE)));
+        PriorityQueue<List<Object>> file = new PriorityQueue<>(
+                Comparator.comparingDouble((List<Object> e) -> fScore.getOrDefault(e, Double.MAX_VALUE)));
 
-        gScore.put(depart, 0);
-        fScore.put(depart, heuristique(depart, arrivee, coef));
-        file.add(depart);
+        List<Object> etapeDepart = Arrays.asList(depart, null); // pas de ligne au depart
+        gScore.put(etapeDepart, 0);
+        fScore.put(etapeDepart, heuristique(depart, arrivee, coef));
+        file.add(etapeDepart);
 
         while (!file.isEmpty()) {
-            Arret courant = file.poll();
+            List<Object> courant = file.poll();
+            Arret arretCourant = (Arret) courant.get(0);
+            Ligne ligneCourante = (Ligne) courant.get(1);
 
-            if (courant.equals(arrivee)) {
-                LinkedList<Arret> chemin = new LinkedList<>();
-                Arret arret = arrivee;
-                chemin.addFirst(arret);
-                while (!arret.equals(depart)) {
-                    arret = predecesseurs.get(arret);
-                    if (arret == null) {
-                        return null;
-                    }
-                    chemin.addFirst(arret);
+            if (arretCourant.equals(arrivee)) {
+                LinkedList<List<Object>> chemin = new LinkedList<>();
+                List<Object> e = courant;
+                chemin.addFirst(e);
+                while (predecesseurs.get(e) != null) {
+                    e = predecesseurs.get(e);
+                    chemin.addFirst(e);
                 }
                 return chemin;
             }
 
-            for (Map.Entry<Arret, Map<Ligne, Integer>> v : leGraphe.get(courant).entrySet()) {
+            for (Map.Entry<Arret, Map<Ligne, Integer>> v : leGraphe.get(arretCourant).entrySet()) {
                 Arret voisin = v.getKey();
 
-                // poids minimal parmi les lignes autorisees
-                int coutTrajet = Integer.MAX_VALUE;
                 for (Map.Entry<Ligne, Integer> c : v.getValue().entrySet()) {
-                    boolean autorisee = lesLignes == null || lesLignes.isEmpty() || lesLignes.contains(c.getKey());
-                    if (autorisee && c.getValue() >= 0) {
-                        coutTrajet = Math.min(coutTrajet, c.getValue());
+                    Ligne ligne = c.getKey();
+                    boolean autorisee = lesLignes == null || lesLignes.isEmpty() || lesLignes.contains(ligne);
+                    if (!autorisee || c.getValue() < 0) {
+                        continue;
                     }
-                }
-                if (coutTrajet == Integer.MAX_VALUE) {
-                    continue;
-                }
 
-                long nouveauCout = (long) gScore.get(courant) + coutTrajet;
-                if (nouveauCout > Integer.MAX_VALUE) {
-                    continue;
-                }
+                    int correspondance = (ligneCourante != null && !ligneCourante.equals(ligne))
+                            ? coutCorrespondance : 0;
+                    long nouveauCout = (long) gScore.get(courant) + c.getValue() + correspondance;
+                    if (nouveauCout > Integer.MAX_VALUE) {
+                        continue;
+                    }
 
-                if (nouveauCout < gScore.getOrDefault(voisin, Integer.MAX_VALUE)) {
-                    file.remove(voisin); // AVANT de modifier fScore
-                    gScore.put(voisin, (int) nouveauCout);
-                    fScore.put(voisin, nouveauCout + heuristique(voisin, arrivee, coef));
-                    predecesseurs.put(voisin, courant);
-                    file.add(voisin);
+                    List<Object> suivant = Arrays.asList(voisin, ligne);
+                    if (nouveauCout < gScore.getOrDefault(suivant, Integer.MAX_VALUE)) {
+                        file.remove(suivant); // AVANT de modifier fScore
+                        gScore.put(suivant, (int) nouveauCout);
+                        fScore.put(suivant, nouveauCout + heuristique(voisin, arrivee, coef));
+                        predecesseurs.put(suivant, courant);
+                        file.add(suivant);
+                    }
                 }
             }
         }

@@ -67,6 +67,6 @@ public class Ligne {
 
     @Override
     public String toString() {
-        return libelle + ", Depart= " + TerminusDepart + ", Arrivee= " + TerminusArrivee;
+        return libelle;
     }
 }
