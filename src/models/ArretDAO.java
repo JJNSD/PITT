@@ -114,23 +114,22 @@ public class ArretDAO {
         }
     }
 
-    public boolean deleteArret(Arret object) throws Exception {
+    public boolean deleteArret(Arret arret) throws Exception {
 
         String query = "DELETE FROM \"bdd-pitt\".arret WHERE idArret = ?";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
-            ps.setInt(1, object.getId());
+            ps.setInt(1, arret.getId());
 
             int arretsModifies = ps.executeUpdate();
 
             return arretsModifies > 0;
 
         } catch (SQLException e) {
-            System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + object.getId() + ". Détails:");
+            System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + arret.getId() + ". Détails:");
             e.printStackTrace();
-            throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + object.getId(), e);
+            throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + arret.getId(), e);
         }
     }
-
 }
