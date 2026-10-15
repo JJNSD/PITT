@@ -26,7 +26,7 @@ public class HoraireDepartDAO {
 
     public HoraireDepart getHoraireDepartByID(int idHoraireDepart, Ligne uneLigne) throws Exception {
 
-        String query = "SELECT heuredepart, idtypehoraire FROM \"bdd-pitt\".horairedepart WHERE idhorairedepart = ? AND idligne = ?";
+        String query = "SELECT heuredepart, idtypehoraire FROM \"pitt-bdd\".horairedepart WHERE idhorairedepart = ? AND idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idHoraireDepart);
             ps.setInt(2, uneLigne.getId());
@@ -56,7 +56,7 @@ public class HoraireDepartDAO {
         List<HoraireDepart> lesHoraires = new ArrayList<>();
         Map<Integer, TypeHoraire> typesDejaCharges = new HashMap<>(); // évite de recharger le même type
 
-        String query = "SELECT idhorairedepart, heuredepart, idtypehoraire FROM \"bdd-pitt\".horairedepart WHERE idligne = ? ORDER BY heuredepart";
+        String query = "SELECT idhorairedepart, heuredepart, idtypehoraire FROM \"pitt-bdd\".horairedepart WHERE idligne = ? ORDER BY heuredepart";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, uneLigne.getId());
 
@@ -87,7 +87,7 @@ public class HoraireDepartDAO {
      * Insère un horaire de départ (l'id de l'objet est utilisé tel quel).
      */
     public void insertHoraireDepart(HoraireDepart horaire) throws Exception {
-        String query = "INSERT INTO \"bdd-pitt\".horairedepart (idhorairedepart, idligne, heuredepart, idtypehoraire) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO \"pitt-bdd\".horairedepart (idhorairedepart, idligne, heuredepart, idtypehoraire) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, horaire.getId());
             ps.setInt(2, horaire.getLigneAffecte().getId());
@@ -107,7 +107,7 @@ public class HoraireDepartDAO {
      * @return true si une ligne a été modifiée, false si l'horaire n'existe pas
      */
     public boolean updateHoraireDepart(HoraireDepart horaire) throws Exception {
-        String query = "UPDATE \"bdd-pitt\".horairedepart SET heuredepart = ?, idtypehoraire = ? WHERE idhorairedepart = ? AND idligne = ?";
+        String query = "UPDATE \"pitt-bdd\".horairedepart SET heuredepart = ?, idtypehoraire = ? WHERE idhorairedepart = ? AND idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setTime(1, Time.valueOf(horaire.getHeureDepart()));
             ps.setInt(2, horaire.getTypeHoraire().getId());
@@ -127,7 +127,7 @@ public class HoraireDepartDAO {
      * @return true si une ligne a été supprimée, false si l'horaire n'existe pas
      */
     public boolean deleteHoraireDepart(int idHoraireDepart, Ligne uneLigne) throws Exception {
-        String query = "DELETE FROM \"bdd-pitt\".horairedepart WHERE idhorairedepart = ? AND idligne = ?";
+        String query = "DELETE FROM \"pitt-bdd\".horairedepart WHERE idhorairedepart = ? AND idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idHoraireDepart);
             ps.setInt(2, uneLigne.getId());

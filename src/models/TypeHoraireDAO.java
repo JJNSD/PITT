@@ -18,7 +18,7 @@ public class TypeHoraireDAO {
 
     public TypeHoraire getTypeHoraireByID(int idTypeHoraire) throws Exception {
 
-        String query = "SELECT idtypehoraire, libelletypehoraire FROM \"bdd-pitt\".typehoraire WHERE idtypehoraire = ?";
+        String query = "SELECT libelletypehoraire FROM \"pitt-bdd\".typehoraire WHERE idtypehoraire = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idTypeHoraire);
 
@@ -43,7 +43,7 @@ public class TypeHoraireDAO {
     public List<TypeHoraire> getAllTypeHoraire() throws Exception {
         List<TypeHoraire> lesHoraires = new ArrayList<>();
 
-        String query = "SELECT idtypehoraire, libelletypehoraire FROM \"bdd-pitt\".typehoraire";
+        String query = "SELECT idtypehoraire, libelletypehoraire FROM \"pitt-bdd\".typehoraire";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -63,7 +63,7 @@ public class TypeHoraireDAO {
     }
 
     public int insertTypeHoraire(TypeHoraire horaire) throws Exception {
-        String query = "INSERT INTO \"bdd-pitt\".typehoraire (libelletypehoraire) VALUES (?) RETURNING idtypehoraire";
+        String query = "INSERT INTO \"pitt-bdd\".typehoraire (libelletypehoraire) VALUES (?) RETURNING idtypehoraire";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, horaire.getLibelle());
 
@@ -79,7 +79,7 @@ public class TypeHoraireDAO {
     }
 
     public boolean updateTypeHoraire(TypeHoraire horaire) throws Exception {
-        String query = "UPDATE \"bdd-pitt\".typehoraire SET libelletypehoraire = ? WHERE idtypehoraire = ?";
+        String query = "UPDATE \"pitt-bdd\".typehoraire SET libelletypehoraire = ? WHERE idtypehoraire = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, horaire.getLibelle());
             ps.setInt(2, horaire.getId());
@@ -93,7 +93,7 @@ public class TypeHoraireDAO {
     }
 
     public boolean deleteTypeHoraire (int idTypeHoraire) throws Exception {
-        String query = "DELETE FROM \"bdd-pitt\".typehoraire WHERE idtypehoraire = ?";
+        String query = "DELETE FROM \"pitt-bdd\".typehoraire WHERE idtypehoraire = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idTypeHoraire);
 

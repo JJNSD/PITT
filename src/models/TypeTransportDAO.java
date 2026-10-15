@@ -17,7 +17,7 @@ public class TypeTransportDAO {
 
     public TypeTransport getTypeTransportByID(int idTypeTransport) throws Exception {
 
-        String query = "SELECT idtypetransport, libelletypetransport, cout FROM \"bdd-pitt\".typetransport WHERE idtypetransport = ?";
+        String query = "SELECT idtypetransport, libelletypetransport, cout FROM \"pitt-bdd\".typetransport WHERE idtypetransport = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idTypeTransport);
 
@@ -43,7 +43,7 @@ public class TypeTransportDAO {
     public List<TypeTransport> getAllTypeTransport() throws Exception {
         List<TypeTransport> lesTransports = new ArrayList<>();
 
-        String query = "SELECT idtypetransport, libelletypetransport, cout FROM \"bdd-pitt\".typetransport";
+        String query = "SELECT idtypetransport, libelletypetransport, cout FROM \"pitt-bdd\".typetransport";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -64,7 +64,7 @@ public class TypeTransportDAO {
     }
 
     public int insertTypeTransport(TypeTransport transport) throws Exception {
-        String query = "INSERT INTO \"bdd-pitt\".typetransport (libelletypetransport, cout) VALUES (?, ?) RETURNING idtypetransport";
+        String query = "INSERT INTO \"pitt-bdd\".typetransport (libelletypetransport, cout) VALUES (?, ?) RETURNING idtypetransport";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, transport.getNomType());
             ps.setFloat(2, transport.getCout());
@@ -81,7 +81,7 @@ public class TypeTransportDAO {
     }
 
     public boolean updateTypeTransport(TypeTransport transport) throws Exception {
-        String query = "UPDATE \"bdd-pitt\".typetransport SET libelletypetransport = ?, cout = ? WHERE idtypetransport = ?";
+        String query = "UPDATE \"pitt-bdd\".typetransport SET libelletypetransport = ?, cout = ? WHERE idtypetransport = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, transport.getNomType());
             ps.setFloat(2, transport.getCout());
@@ -96,7 +96,7 @@ public class TypeTransportDAO {
     }
 
     public boolean deleteTypeTransport(int idTypeTransport) throws Exception {
-        String query = "DELETE FROM \"bdd-pitt\".typetransport WHERE idtypetransport = ?";
+        String query = "DELETE FROM \"pitt-bdd\".typetransport WHERE idtypetransport = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idTypeTransport);
 

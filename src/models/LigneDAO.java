@@ -25,7 +25,7 @@ public class LigneDAO {
 
     public Ligne getLigneByID(int idLigne) throws Exception {
 
-        String query = "SELECT libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee FROM \"bdd-pitt\".ligne WHERE idligne = ?";
+        String query = "SELECT libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee FROM \"pitt-bdd\".ligne WHERE idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idLigne);
 
@@ -56,7 +56,7 @@ public class LigneDAO {
         Map<Integer, Arret> arretsCharges = new HashMap<>();
         Map<Integer, TypeTransport> typesCharges = new HashMap<>();
 
-        String query = "SELECT idligne, libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee FROM \"bdd-pitt\".ligne";
+        String query = "SELECT idligne, libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee FROM \"pitt-bdd\".ligne";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -97,7 +97,7 @@ public class LigneDAO {
     }
 
     public int insertLigne(Ligne ligne) throws Exception {
-        String query = "INSERT INTO \"bdd-pitt\".ligne (libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee) VALUES (?, ?, ?, ?, ?) RETURNING idligne";
+        String query = "INSERT INTO \"pitt-bdd\".ligne (libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee) VALUES (?, ?, ?, ?, ?) RETURNING idligne";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, ligne.getLibelle());
             ps.setString(2, ligne.getHexColor());
@@ -117,7 +117,7 @@ public class LigneDAO {
     }
 
     public boolean updateLigne(Ligne ligne) throws Exception {
-        String query = "UPDATE \"bdd-pitt\".ligne SET libelle = ?, hexcolor = ?, idtypetransport = ?, idarretdepart = ?, idarretarrivee = ? WHERE idligne = ?";
+        String query = "UPDATE \"pitt-bdd\".ligne SET libelle = ?, hexcolor = ?, idtypetransport = ?, idarretdepart = ?, idarretarrivee = ? WHERE idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, ligne.getLibelle());
             ps.setString(2, ligne.getHexColor());
@@ -135,7 +135,7 @@ public class LigneDAO {
     }
 
     public boolean deleteLigne(int idLigne) throws Exception {
-        String query = "DELETE FROM \"bdd-pitt\".ligne WHERE idligne = ?";
+        String query = "DELETE FROM \"pitt-bdd\".ligne WHERE idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idLigne);
 
