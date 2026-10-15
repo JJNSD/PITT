@@ -2,9 +2,7 @@ package models;
 
 import metiers.Arret;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,4 +62,75 @@ public class ArretDAO {
             throw new Exception("Erreur lors de la recherche de tous les arrets", e);
         }
     }
+
+    public boolean addArret(Arret arret) throws Exception {
+        String query = "INSERT INTO \"bdd-pitt\".arret (nomArret,lattitude,longitude) VALUES (?, ?, ?)";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, arret.getNomArret());
+            ps.setDouble(2, arret.getLattitude());
+            ps.setDouble(3, arret.getLongitude());
+
+            int arretsModifies = ps.executeUpdate();
+
+            if (arretsModifies == 0) {
+                return false;
+            }
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                //si id a bien été crée
+                if (generatedKeys.next()) {
+                    arret.setId(generatedKeys.getInt(1)); //1 = le num de la colonne, car la seule colonne ds ce ResultSet)
+                } else {
+                    throw new Exception("Création de l'arrêt a échoué, aucun identifiant n'a pu être récupéré.");
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la création d'un arrêt. Détails:");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateArret(Arret unArret) throws Exception {
+        String query = "UPDATE \"bdd-pitt\".arret SET nomArret = ?, lattitude = ?, longitude = ? WHERE idArret = ?";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            ps.setString(1, unArret.getNomArret());
+            ps.setDouble(2, unArret.getLattitude());
+            ps.setDouble(3, unArret.getLongitude());
+            ps.setInt(4, unArret.getId());
+
+            int arretsModifies = ps.executeUpdate();
+
+            return arretsModifies > 0;
+
+        } catch (SQLException e) {
+            System.err.println("ERREUR BDD lors de la mise à jour de l'arrêt ID=" + unArret.getId() + ". Détails:");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la mise à jour de l'arrêt avec ID : " + unArret.getId(), e);
+        }
+    }
+
+    public boolean deleteArret(Arret object) throws Exception {
+
+        String query = "DELETE FROM \"bdd-pitt\".arret WHERE idArret = ?";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            ps.setInt(1, object.getId());
+
+            int arretsModifies = ps.executeUpdate();
+
+            return arretsModifies > 0;
+
+        } catch (SQLException e) {
+            System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + object.getId() + ". Détails:");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + object.getId(), e);
+        }
+    }
+
 }
