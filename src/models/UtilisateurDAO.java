@@ -15,7 +15,7 @@ public class UtilisateurDAO {
 
     public Utilisateur getUtilisateurByUsername(String username) throws Exception {
 
-        String query = "SELECT username, password, prenom, nom, isAdmin FROM \"bdd-pitt\".utilisateur WHERE username = ?";
+        String query = "SELECT username, password, prenom, nom, isAdmin FROM \"pitt-bdd\".utilisateur WHERE username = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, username);
 
@@ -43,7 +43,7 @@ public class UtilisateurDAO {
     public List<Utilisateur> getAllArrets() throws Exception {
         List<Utilisateur> lesUsers = new ArrayList<>();
 
-        String query = "SELECT username, password, prenom, nom, isAdmin FROM \"bdd-pitt\".utilisateur";
+        String query = "SELECT username, password, prenom, nom, isAdmin FROM \"pitt-bdd\".utilisateur";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -66,7 +66,7 @@ public class UtilisateurDAO {
     }
 
     public boolean addUser(Utilisateur user) throws Exception {
-        String query = "INSERT INTO \"bdd-pitt\".utilisateur (username, password, prenom, nom, isAdmin) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO \"pitt-bdd\".utilisateur (username, password, prenom, nom, isAdmin) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, user.getUsername());
@@ -86,7 +86,7 @@ public class UtilisateurDAO {
     }
 
     public boolean updateUser(Utilisateur user) throws Exception {
-        String query = "UPDATE \"bdd-pitt\".utilisateur SET password = ?, prenom = ?, nom = ?, isAdmin = ? WHERE username = ?";
+        String query = "UPDATE \"pitt-bdd\".utilisateur SET password = ?, prenom = ?, nom = ?, isAdmin = ? WHERE username = ?";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
@@ -108,7 +108,7 @@ public class UtilisateurDAO {
     }
 
     public boolean deleteUser(Utilisateur user) throws Exception {
-        String query = "DELETE FROM \"bdd-pitt\".utilisateur WHERE username = ?";
+        String query = "DELETE FROM \"pitt-bdd\".utilisateur WHERE username = ?";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
