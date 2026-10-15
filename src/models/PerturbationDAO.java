@@ -13,11 +13,10 @@ import java.util.List;
 
 public class PerturbationDAO {
     private Connection connexion;
-    private ArretDAO arretDAO;
+    private static ArretDAO arretDAO =  new ArretDAO();
 
     public PerturbationDAO() {
         this.connexion = ConnexionBDD.getConnexion();
-        this.arretDAO = new ArretDAO();
     }
 
     private List<Arret> getArretsPerturbes(int idPerturbation) {
@@ -25,6 +24,7 @@ public class PerturbationDAO {
 
         String query = "SELECT idArret FROM \"pitt-bdd\".arretperturbe WHERE idperturbation = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
+            ps.setInt(1, idPerturbation);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idArret = rs.getInt("idArret");

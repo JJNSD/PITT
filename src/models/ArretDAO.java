@@ -9,11 +9,10 @@ import java.util.List;
 
 public class ArretDAO {
     private Connection connexion;
-    private PerturbationDAO perturbationDAO;
+    private static PerturbationDAO perturbationDAO = new PerturbationDAO();
 
     public ArretDAO() {
         this.connexion = ConnexionBDD.getConnexion();
-        this.perturbationDAO = new PerturbationDAO();
     }
 
     private List<Perturbation> getPerturbationUnArret(int idArret) {
@@ -21,6 +20,7 @@ public class ArretDAO {
 
         String query = "SELECT idPerturbation FROM \"pitt-bdd\".arretperturbe WHERE idArret = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
+            ps.setInt(1, idArret);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idPerturbation = rs.getInt("idPerturbation");
