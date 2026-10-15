@@ -18,15 +18,15 @@ public class TypeHoraireDAO {
 
     public TypeHoraire getTypeHoraireByID(int idTypeHoraire) throws Exception {
 
-        String query = "SELECT libelletypehoraire FROM \"pitt-bdd\".typehoraire WHERE idtypehoraire = ?";
+        String query = "SELECT libelle FROM \"pitt-bdd\".typehoraire WHERE idtypehoraire = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idTypeHoraire);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    String libelletypehoraire = rs.getString("libelletypehoraire");
+                    String libelle = rs.getString("libelle");
 
-                    TypeHoraire horaire = new TypeHoraire(idTypeHoraire, libelletypehoraire);
+                    TypeHoraire horaire = new TypeHoraire(idTypeHoraire, libelle);
                     return horaire;
                 } else {
                     return null;
@@ -43,14 +43,14 @@ public class TypeHoraireDAO {
     public List<TypeHoraire> getAllTypeHoraire() throws Exception {
         List<TypeHoraire> lesHoraires = new ArrayList<>();
 
-        String query = "SELECT idtypehoraire, libelletypehoraire FROM \"pitt-bdd\".typehoraire";
+        String query = "SELECT idtypehoraire, libelle FROM \"pitt-bdd\".typehoraire";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idTypeHoraire = rs.getInt("idtypehoraire");
-                    String libelletypehoraire = rs.getString("libelletypehoraire");
+                    String libelle = rs.getString("libelle");
 
-                    TypeHoraire horaire = new TypeHoraire(idTypeHoraire, libelletypehoraire);
+                    TypeHoraire horaire = new TypeHoraire(idTypeHoraire, libelle);
                     lesHoraires.add(horaire);
                 }
             }
@@ -63,7 +63,7 @@ public class TypeHoraireDAO {
     }
 
     public int insertTypeHoraire(TypeHoraire horaire) throws Exception {
-        String query = "INSERT INTO \"pitt-bdd\".typehoraire (libelletypehoraire) VALUES (?) RETURNING idtypehoraire";
+        String query = "INSERT INTO \"pitt-bdd\".typehoraire (libelle) VALUES (?) RETURNING idtypehoraire";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, horaire.getLibelle());
 
@@ -79,7 +79,7 @@ public class TypeHoraireDAO {
     }
 
     public boolean updateTypeHoraire(TypeHoraire horaire) throws Exception {
-        String query = "UPDATE \"pitt-bdd\".typehoraire SET libelletypehoraire = ? WHERE idtypehoraire = ?";
+        String query = "UPDATE \"pitt-bdd\".typehoraire SET libelle = ? WHERE idtypehoraire = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setString(1, horaire.getLibelle());
             ps.setInt(2, horaire.getId());
