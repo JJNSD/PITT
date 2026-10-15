@@ -71,6 +71,6 @@ public class Arret {
 
     @Override
     public String toString() {
-        return nomArret;
+        return "[" + id + "] " + nomArret;
     }
 }
