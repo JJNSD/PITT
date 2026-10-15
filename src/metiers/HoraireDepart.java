@@ -6,6 +6,7 @@ public class HoraireDepart {
     private int id;
     private Ligne ligneAffecte;
     private LocalTime heureDepart;
+    private TypeHoraire typeHoraire;
 
     public int getId() {
         return id;
@@ -31,9 +32,18 @@ public class HoraireDepart {
         this.heureDepart = heureDepart;
     }
 
-    public HoraireDepart(int id, Ligne ligneAffecte, LocalTime heureDepart) {
+    public TypeHoraire getTypeHoraire() {
+        return typeHoraire;
+    }
+
+    public void setTypeHoraire(TypeHoraire typeHoraire) {
+        this.typeHoraire = typeHoraire;
+    }
+
+    public HoraireDepart(int id, Ligne ligneAffecte, LocalTime heureDepart, TypeHoraire typeHoraire) {
         this.id = id;
         this.ligneAffecte = ligneAffecte;
         this.heureDepart = heureDepart;
+        this.typeHoraire = typeHoraire;
     }
 }
