@@ -108,7 +108,6 @@ public class UtilisateurDAO {
     }
 
     public boolean deleteUser(Utilisateur user) throws Exception {
-
         String query = "DELETE FROM \"bdd-pitt\".utilisateur WHERE username = ?";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {

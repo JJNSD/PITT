@@ -49,6 +49,10 @@ public class Perturbation {
         return arretsPerturbes;
     }
 
+    public void setArretsPerturbes(List<Arret> arretsPerturbes) {
+        this.arretsPerturbes = arretsPerturbes;
+    }
+
     public boolean arretPresent(Arret arret) {
         return this.arretsPerturbes.stream()
                 .anyMatch(a -> a.getId() == arret.getId());

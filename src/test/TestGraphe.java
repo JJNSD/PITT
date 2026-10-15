@@ -93,6 +93,8 @@ public class TestGraphe {
         System.out.println("Dijkstra Michelet -> Lorraine : " + g.cheminDjikstra(a1, a7, null));
         System.out.println("Dijkstra Lorraine -> Michelet : " + g.cheminDjikstra(a7, a1, null));
 
+        // test a*
+
         System.out.println("A* Michelet -> Lorraine : " + g.cheminAStar(a1, a7, null));
         System.out.println("A* Lorraine -> Michelet : " + g.cheminDjikstra(a7, a1, null));
 

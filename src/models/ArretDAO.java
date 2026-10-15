@@ -1,6 +1,7 @@
 package models;
 
 import metiers.Arret;
+import metiers.Perturbation;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,14 +9,51 @@ import java.util.List;
 
 public class ArretDAO {
     private Connection connexion;
+    private PerturbationDAO perturbationDAO;
 
     public ArretDAO() {
         this.connexion = ConnexionBDD.getConnexion();
+        this.perturbationDAO = new PerturbationDAO();
+    }
+
+    private List<Perturbation> getPerturbationUnArret(int idArret) {
+        List<Perturbation> lesPerturbations = new ArrayList<>();
+
+        String query = "SELECT idPerturbation FROM \"pitt-bdd\".arretperturbe WHERE idArret = ?";
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int idPerturbation = rs.getInt("idPerturbation");
+                    lesPerturbations.add(perturbationDAO.getPerturbationByID(idPerturbation));
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la recherche de tous les users. Détails:");
+            e.printStackTrace();
+        }
+        return lesPerturbations;
+    }
+
+    private boolean deleteArretInArretPerturbe(int idArret) {
+        String query = "DELETE FROM \"pitt-bdd\".arretperturbe WHERE idArret = ?";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            ps.setInt(1, idArret);
+
+            int arretsModifies = ps.executeUpdate();
+
+            return arretsModifies > 0;
+
+        } catch (SQLException e) {
+            System.err.println("ERREUR BDD lors de la suppression de l'arrêt perturbé ID=" + idArret + ". Détails:");
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public Arret getArretByID(int idArret) throws Exception {
-
-        String query = "SELECT idArret, nomArret, lattitude, longitude FROM \"bdd-pitt\".arret WHERE idArret = ?";
+        String query = "SELECT idArret, nomArret, lattitude, longitude FROM \"pitt-bdd\".arret WHERE idArret = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idArret);
 
@@ -26,6 +64,7 @@ public class ArretDAO {
                     float longitude = rs.getFloat("longitude");
 
                     Arret arret = new Arret(idArret, nom, lattitude, longitude);
+                    arret.setLesPerturbations(this.getPerturbationUnArret(idArret));
                     return arret;
                 } else {
                     return null; // aucun arret trouvé
@@ -42,7 +81,7 @@ public class ArretDAO {
     public List<Arret> getAllArrets() throws Exception {
         List<Arret> lesArrets = new ArrayList<>();
 
-        String query = "SELECT idArret, nomArret, lattitude, longitude FROM \"bdd-pitt\".arret";
+        String query = "SELECT idArret, nomArret, lattitude, longitude FROM \"pitt-bdd\".arret";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -52,6 +91,7 @@ public class ArretDAO {
                     float longitude = rs.getFloat("longitude");
 
                     Arret arret = new Arret(idArret, nom, lattitude, longitude);
+                    arret.setLesPerturbations(this.getPerturbationUnArret(idArret));
                     lesArrets.add(arret);
                 }
             }
@@ -64,7 +104,7 @@ public class ArretDAO {
     }
 
     public boolean addArret(Arret arret) throws Exception {
-        String query = "INSERT INTO \"bdd-pitt\".arret (nomArret,lattitude,longitude) VALUES (?, ?, ?)";
+        String query = "INSERT INTO \"pitt-bdd\".arret (nomArret,lattitude,longitude) VALUES (?, ?, ?)";
 
         try (PreparedStatement ps = connexion.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, arret.getNomArret());
@@ -94,7 +134,7 @@ public class ArretDAO {
     }
 
     public boolean updateArret(Arret unArret) throws Exception {
-        String query = "UPDATE \"bdd-pitt\".arret SET nomArret = ?, lattitude = ?, longitude = ? WHERE idArret = ?";
+        String query = "UPDATE \"pitt-bdd\".arret SET nomArret = ?, lattitude = ?, longitude = ? WHERE idArret = ?";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
@@ -115,21 +155,25 @@ public class ArretDAO {
     }
 
     public boolean deleteArret(Arret arret) throws Exception {
+        if (deleteArretInArretPerturbe(arret.getId())) {
+            String query = "DELETE FROM \"pitt-bdd\".arret WHERE idArret = ?";
 
-        String query = "DELETE FROM \"bdd-pitt\".arret WHERE idArret = ?";
+            try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+                ps.setInt(1, arret.getId());
 
-            ps.setInt(1, arret.getId());
+                int arretsModifies = ps.executeUpdate();
 
-            int arretsModifies = ps.executeUpdate();
+                return arretsModifies > 0;
 
-            return arretsModifies > 0;
-
-        } catch (SQLException e) {
-            System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + arret.getId() + ". Détails:");
-            e.printStackTrace();
-            throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + arret.getId(), e);
+            } catch (SQLException e) {
+                System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + arret.getId() + ". Détails:");
+                e.printStackTrace();
+                throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + arret.getId(), e);
+            }
+        } else {
+            System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + arret.getId() + " dans ArretPerturbe");
+            return false;
         }
     }
 }

@@ -48,6 +48,10 @@ public class Arret {
         return lesPerturbations;
     }
 
+    public void setLesPerturbations(List<Perturbation> lesPerturbations) {
+        this.lesPerturbations = lesPerturbations;
+    }
+
     public boolean perturbationPresente(Perturbation perturbation) {
         return this.lesPerturbations.stream()
                 .anyMatch(p -> p.getId() == perturbation.getId());
