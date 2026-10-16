@@ -1,6 +1,7 @@
 package metiers;
 
 import java.util.*;
+import java.time.LocalDateTime;
 
 
 public class Graphe {
@@ -79,6 +80,7 @@ public class Graphe {
                 || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
             return null;
         }
+        LocalDateTime maintenant = LocalDateTime.now();
 
         Queue<Arret> file = new ArrayDeque<>();
         Set<Arret> visites = new HashSet<>();
@@ -102,6 +104,9 @@ public class Graphe {
             }
             for (Map.Entry<Arret, Map<Ligne, Integer>> v : leGraphe.get(courant).entrySet()) {
                 Arret voisin = v.getKey();
+                if (voisin.estPerturbe(maintenant)) {
+                    continue;
+                }
                 if (visites.add(voisin)) {
                     predecesseurs.put(voisin, courant);
 
@@ -171,6 +176,7 @@ public class Graphe {
                 || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
             return null;
         }
+        LocalDateTime maintenant = LocalDateTime.now();
 
         Map<List<Object>, Integer> gScore = new HashMap<>();
         Map<List<Object>, Double> fScore = new HashMap<>();
@@ -202,7 +208,9 @@ public class Graphe {
 
             for (Map.Entry<Arret, Map<Ligne, Integer>> v : leGraphe.get(arretCourant).entrySet()) {
                 Arret voisin = v.getKey();
-
+                if (voisin.estPerturbe(maintenant)) {
+                    continue;
+                }
                 for (Map.Entry<Ligne, Integer> c : v.getValue().entrySet()) {
                     Ligne ligne = c.getKey();
                     boolean autorisee = lesLignes == null || lesLignes.isEmpty() || lesLignes.contains(ligne);

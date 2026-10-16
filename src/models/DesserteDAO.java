@@ -2,6 +2,7 @@ package models;
 
 import metiers.Arret;
 import metiers.Desserte;
+import metiers.Ligne;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

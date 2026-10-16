@@ -1,5 +1,6 @@
 package metiers;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,8 +70,16 @@ public class Arret {
         this.nomArret = nomArret;
         this.lattitude = lattitude;
         this.longitude = longitude;
-
         this.lesPerturbations = new ArrayList<>();
+    }
+
+    public boolean estPerturbe(LocalDateTime instant) {
+        for (Perturbation p : lesPerturbations) {
+            boolean commence = instant.isAfter(p.getDateHeureDebut());
+            boolean pasFinie = p.getDateHeureFin() == null || instant.isBefore(p.getDateHeureFin());
+            return (commence && pasFinie);
+        }
+        return false;
     }
 
     @Override
