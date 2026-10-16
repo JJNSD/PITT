@@ -17,12 +17,9 @@ import java.util.Map;
 public class HoraireDepartDAO {
 
     private Connection connexion;
-    private TypeHoraireDAO typeHoraireDAO;
+    private static TypeHoraireDAO typeHoraireDAO = new TypeHoraireDAO();
 
-    public HoraireDepartDAO() {
-        this.connexion = ConnexionBDD.getConnexion();
-        this.typeHoraireDAO = new TypeHoraireDAO();
-    }
+    public HoraireDepartDAO() { this.connexion = ConnexionBDD.getConnexion(); }
 
     public HoraireDepart getHoraireDepartByID(int idHoraireDepart, Ligne uneLigne) throws Exception {
 

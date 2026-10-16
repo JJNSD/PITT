@@ -14,14 +14,10 @@ import java.util.Map;
 
 public class LigneDAO {
     private Connection connexion;
-    private ArretDAO arretDAO;
-    private TypeTransportDAO typeTransportDAO;
+    private static ArretDAO arretDAO =  new ArretDAO();
+    private static TypeTransportDAO typeTransportDAO = new TypeTransportDAO();
 
-    public LigneDAO() {
-        this.connexion = ConnexionBDD.getConnexion();
-        this.arretDAO = new ArretDAO();
-        this.typeTransportDAO = new TypeTransportDAO();
-    }
+    public LigneDAO() { this.connexion = ConnexionBDD.getConnexion(); }
 
     public Ligne getLigneByID(int idLigne) throws Exception {
 

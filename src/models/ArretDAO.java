@@ -11,9 +11,7 @@ public class ArretDAO {
     private Connection connexion;
     private static PerturbationDAO perturbationDAO = new PerturbationDAO();
 
-    public ArretDAO() {
-        this.connexion = ConnexionBDD.getConnexion();
-    }
+    public ArretDAO() { this.connexion = ConnexionBDD.getConnexion(); }
 
     private List<Perturbation> getPerturbationUnArret(int idArret) {
         List<Perturbation> lesPerturbations = new ArrayList<>();
