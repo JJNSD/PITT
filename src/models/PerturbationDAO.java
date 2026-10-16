@@ -63,7 +63,7 @@ public class PerturbationDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    String libelle = rs.getString("nom");
+                    String libelle = rs.getString("libelle");
                     String dateHeureDebutString = rs.getString("dateHeureDebut");
                     String dateHeureFinString = rs.getString("dateHeureFin");
 

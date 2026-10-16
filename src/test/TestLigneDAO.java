@@ -16,9 +16,19 @@ public class TestLigneDAO {
         System.out.println(l1);
 
         System.out.println(ligneDAO.getAllLigne());
+        Ligne D = new Ligne(0,"D", "000000", a1, a2, t1);
 
-        boolean idDelete = ligneDAO.deleteLigne(38);
-        System.out.println("Ligne delete : " + idDelete);
+        boolean ok = ligneDAO.insertLigne(D);
+        System.out.println("Insertion réussie : " + ok);
+
+        Ligne l = ligneDAO.getLigneByID(38);
+        l.setLibelle("E"); // si tu as un setter
+        ligneDAO.updateLigne(l);
+
+        System.out.println(l);
+
+        boolean ok2 = ligneDAO.deleteLigne(38);
+        System.out.println("Ligne delete : " + ok2);
     }
 }
 
