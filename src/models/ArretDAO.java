@@ -11,7 +11,26 @@ public class ArretDAO {
     private Connection connexion;
     private static PerturbationDAO perturbationDAO = new PerturbationDAO();
 
-    public ArretDAO() { this.connexion = ConnexionBDD.getConnexion(); }
+    public ArretDAO() {
+        this.connexion = ConnexionBDD.getConnexion();
+    }
+
+    private boolean addArretPerturbe(Arret arret, Perturbation perturbation) {
+        String query = "INSERT INTO \"pitt-bdd\".arretperturbe (idArret,idPerturbation) VALUES (?, ?)";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+            ps.setInt(1, arret.getId());
+            ps.setInt(2, perturbation.getId());
+
+            int arretsModifies = ps.executeUpdate();
+
+            return arretsModifies != 0;
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la création d'un arrêt perturbé. Détails:");
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     private List<Perturbation> getPerturbationUnArret(int idArret) {
         List<Perturbation> lesPerturbations = new ArrayList<>();
