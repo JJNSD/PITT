@@ -110,11 +110,37 @@ public class TestGraphe {
         */
 
         // Test avec BDD
+        long startTime = System.nanoTime();
+
         boolean grapheEstCharge = g.chargerGrapheBDD();
         if (grapheEstCharge) {
             System.out.println(g);
         } else {
             System.out.println("Chargement échoué...");
         }
+
+        long endTime = System.nanoTime();
+
+        System.out.println((endTime - startTime) + " ns");
+
+        // ------ Test de trajets ------
+        Arret gentric = Arret.getArretEnCache(435);
+        Arret beaussier = Arret.getArretEnCache(40);
+
+        // test bfs
+        List<List<Object>> chemin = g.cheminBfs(gentric, beaussier);
+        List<List<Object>> chemin2 = g.cheminBfs(beaussier, gentric);
+        System.out.println("Chemin BFS Gentric -> Beaussier : " + chemin + "\n");
+        System.out.println("Chemin BFS Beaussier -> Gentric : " + chemin2 + "\n");
+
+        // test djikstra
+        System.out.println("Dijkstra Gentric -> Beaussier : " + g.cheminDjikstra(gentric, beaussier, null) + "\n");
+        System.out.println("Dijkstra Beaussier -> Gentric : " + g.cheminDjikstra(beaussier, gentric, null) + "\n");
+
+        // test a*
+        System.out.println("A* Gentric -> Beaussier : " + g.cheminAStar(gentric, beaussier, null) + "\n");
+        System.out.println("A* Beaussier -> Gentric : " + g.cheminAStar(beaussier, gentric, null) + "\n");
+
+        // TODO : Améliorer la recherche de chemin pour que le score soit plus élevé par correspondance, trop de correspondances par trajet
     }
 }
