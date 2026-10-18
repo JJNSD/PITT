@@ -1,16 +1,29 @@
 package metiers;
 
+import models.DesserteDAO;
+import models.LigneDAO;
+import models.TypeTransportDAO;
+
 import java.util.*;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 
 public class Graphe {
     private final int coutCorrespondance = 1;
 
+    // Facteurs pour calculer le score => 0 à 10
+    private int facteurDuree;
+    private int facteurDistance;
+    private int facteurCoutMonetaire;
+
     private Map<Arret, Map<Arret, Map<Ligne,Integer>>> leGraphe;
 
-    public Graphe() {
+    public Graphe(int facteurDuree, int facteurDistance, int facteurCoutMonetaire) {
         leGraphe = new HashMap<>();
+        this.facteurDuree = facteurDuree;
+        this.facteurDistance = facteurDistance;
+        this.facteurCoutMonetaire = facteurCoutMonetaire;
     }
 
     public void ajouterSommet(Arret sommet) {
@@ -18,6 +31,7 @@ public class Graphe {
     }
 
     public void ajouterChemin(Arret depart, Arret arrivee, Ligne ligne, int score) {
+        // Vérification de la présence des arrêts
         if (leGraphe.get(depart) == null) {
             ajouterSommet(depart);
         }
@@ -25,7 +39,11 @@ public class Graphe {
             ajouterSommet(arrivee);
         }
 
-        leGraphe.get(depart).put(arrivee,new HashMap<>());
+        // Vérification si un premier chemin existe entre les deux arrêts, toutes lignes confondues
+        if (leGraphe.get(depart).get(arrivee) == null) {
+            leGraphe.get(depart).put(arrivee,new HashMap<>());
+        }
+
         leGraphe.get(depart).get(arrivee).put(ligne,score);
     }
 
@@ -39,29 +57,49 @@ public class Graphe {
 
     @Override
     public String toString() {
-        String affichage = "";
-        for (Map.Entry g : this.leGraphe.entrySet()) {
-            HashMap<String, Integer> val = (HashMap<String, Integer>) g.getValue();
+        return leGraphe.entrySet().stream()
+            .map(g -> {
+                String chemin = g.getValue().entrySet().stream()
+                    .map(voisin -> voisin.getKey() + " : {"
+                        + voisin.getValue().entrySet().stream()
+                        .map(l -> "Ligne " + l.getKey() + " : " + l.getValue())
+                        .collect(Collectors.joining(", "))
+                        + "}")
+                    .collect(Collectors.joining(", "));
 
-            String chemin = "";
-            if (val.size() > 0) {
-                int passages = 1;
+                return "{" + g.getKey() + ", {" + (chemin.isEmpty() ? " " : chemin) + "} }";
+            })
+            .collect(Collectors.joining("\n", "", "\n"));
+    }
 
-                for (Map.Entry p : val.entrySet()) {
-                    if (passages > 1) {
-                        chemin += ", ";
-                    }
-                    chemin += p.getKey() + " : " + p.getValue();
+    // ---------------- Chargement du graphe depuis la BDD ----------------
 
-                    passages++;
+    public boolean chargerGrapheBDD() throws Exception {
+        DesserteDAO desserteDAO = new DesserteDAO();
+        LigneDAO ligneDAO = new LigneDAO();
+        try {
+            List<Desserte> lesDessertes = desserteDAO.getAllDessertes();
+            for (Desserte uneDesserte : lesDessertes) {
+                // Gestion du coût monétaire selon le type
+                float prix = uneDesserte.getLigne().getTypeTransport().getCout();
+                if (uneDesserte.getLigne().getTypeTransport().getNomType().equals("bus") || uneDesserte.getLigne().getTypeTransport().getNomType().equals("tram")) {
+                    prix *= (uneDesserte.getDuree()/60)+1;
+                } else if (uneDesserte.getLigne().getTypeTransport().getNomType().equals("train")) {
+                    prix *= uneDesserte.getDistance();
                 }
-            } else {
-                chemin = " ";
+
+                // Calcul du score
+                int score = (facteurDuree * uneDesserte.getDuree()) + (facteurDistance * uneDesserte.getDistance() + (facteurCoutMonetaire * (int) prix));
+
+                // Ajout du chemin en BDD
+                this.ajouterCheminMAJSiExistant(uneDesserte.getArretPrecedent(), uneDesserte.getArretSuivant(), uneDesserte.getLigne(), score);
             }
 
-            affichage += "{"+g.getKey()+", {"+ chemin + "} } \n";
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return  affichage;
     }
 
     // ---------------- Algos de recherche ----------------

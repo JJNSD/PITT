@@ -20,29 +20,37 @@ public class LigneDAO {
     public LigneDAO() { this.connexion = ConnexionBDD.getConnexion(); }
 
     public Ligne getLigneByID(int idLigne) throws Exception {
+        // Vérification du cache
+        Ligne ligne = Ligne.getLigneEnCache(idLigne);
 
-        String query = "SELECT libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee FROM \"pitt-bdd\".ligne WHERE idligne = ?";
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idLigne);
+        if (ligne == null) {
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String libelle = rs.getString("libelle");
-                    String hexcolor = rs.getString("hexcolor");
+            String query = "SELECT libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee FROM \"pitt-bdd\".ligne WHERE idligne = ?";
+            try (PreparedStatement ps = connexion.prepareStatement(query)) {
+                ps.setInt(1, idLigne);
 
-                    TypeTransport type = typeTransportDAO.getTypeTransportByID(rs.getInt("idtypetransport"));
-                    Arret depart = arretDAO.getArretByID(rs.getInt("idarretdepart"));
-                    Arret arrivee = arretDAO.getArretByID(rs.getInt("idarretarrivee"));
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String libelle = rs.getString("libelle");
+                        String hexcolor = rs.getString("hexcolor");
 
-                    return new Ligne(idLigne, libelle, hexcolor, depart, arrivee, type);
-                } else {
-                    return null; // aucune ligne trouvée
+                        TypeTransport type = typeTransportDAO.getTypeTransportByID(rs.getInt("idtypetransport"));
+                        Arret depart = arretDAO.getArretByID(rs.getInt("idarretdepart"));
+                        Arret arrivee = arretDAO.getArretByID(rs.getInt("idarretarrivee"));
+
+                        ligne = new Ligne(idLigne, libelle, hexcolor, depart, arrivee, type);
+                        return ligne;
+                    } else {
+                        return null; // aucune ligne trouvée
+                    }
                 }
+            } catch (Exception e) {
+                System.err.println("ERREUR BDD lors de la recherche de la ligne ID=" + idLigne + ". Détails:");
+                e.printStackTrace();
+                throw new Exception("Erreur lors de la recherche de la ligne avec ID : " + idLigne, e);
             }
-        } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la recherche de la ligne ID=" + idLigne + ". Détails:");
-            e.printStackTrace();
-            throw new Exception("Erreur lors de la recherche de la ligne avec ID : " + idLigne, e);
+        } else {
+            return ligne;
         }
     }
 

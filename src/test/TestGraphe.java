@@ -4,10 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import metiers.*;
+import models.DesserteDAO;
+import models.LigneDAO;
 
 public class TestGraphe {
-    public static void main(String[] args) {
-        Graphe g = new Graphe();
+    public static void main(String[] args) throws Exception {
+        Graphe g = new Graphe(1, 1, 1);
+
+        /*
 
         // Type de la ligne de Test
         TypeTransport bus = new TypeTransport(1, "Bus", (float) 1.70);
@@ -76,11 +80,11 @@ public class TestGraphe {
 
         //System.out.println(g);
 
-        /*System.out.println("Distance de Farcy à Le Quai : " + g.distanceVoisin(a15, a14, l2) + " | ATTENDU : 4");
+        System.out.println("Distance de Farcy à Le Quai : " + g.distanceVoisin(a15, a14, l2) + " | ATTENDU : 4");
         System.out.println("Distance de Farcy à Doutre Maine : " + g.distanceVoisin(a15, a13, l2) + " | ATTENDU : -1");
         System.out.println("Distance de Michelet à André Leroy : " + g.distanceVoisin(a1, a2, l1) + " | ATTENDU : 1");
         System.out.println("Distance de Foch Haras à Foch Maison Bleu '1' : " + g.distanceVoisin(a4, a6, l1) + " | ATTENDU : -1");
-        System.out.println("Distance de Foch Haras à Foch Maison Bleu 'C' : " + g.distanceVoisin(a4, a6, l2) + " | ATTENDU : 2");*/
+        System.out.println("Distance de Foch Haras à Foch Maison Bleu 'C' : " + g.distanceVoisin(a4, a6, l2) + " | ATTENDU : 2");
 
         // test bfs
         List<List<Object>> chemin = g.cheminBfs(a1, a7);
@@ -102,5 +106,15 @@ public class TestGraphe {
         System.out.println("Djikstra Ralliement -> Les Gares : " + g.cheminDjikstra(a11, a10, null));
 
         System.out.println("Djikstra Ralliement -> André Leroy : " + g.cheminDjikstra(a11, a2, null));
+
+        */
+
+        // Test avec BDD
+        boolean grapheEstCharge = g.chargerGrapheBDD();
+        if (grapheEstCharge) {
+            System.out.println(g);
+        } else {
+            System.out.println("Chargement échoué...");
+        }
     }
 }

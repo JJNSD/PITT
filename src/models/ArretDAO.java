@@ -70,28 +70,36 @@ public class ArretDAO {
     }
 
     public Arret getArretByID(int idArret) throws Exception {
-        String query = "SELECT idArret, nomArret, lattitude, longitude FROM \"pitt-bdd\".arret WHERE idArret = ?";
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idArret);
+        // Vérification du cache
+        Arret arret = Arret.getArretEnCache(idArret);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String nom = rs.getString("nomArret");
-                    float lattitude = rs.getFloat("lattitude");
-                    float longitude = rs.getFloat("longitude");
+        if (arret == null) {
 
-                    Arret arret = new Arret(idArret, nom, lattitude, longitude);
-                    arret.setLesPerturbations(this.getPerturbationUnArret(idArret));
-                    return arret;
-                } else {
-                    return null; // aucun arret trouvé
+            String query = "SELECT idArret, nomArret, lattitude, longitude FROM \"pitt-bdd\".arret WHERE idArret = ?";
+            try (PreparedStatement ps = connexion.prepareStatement(query)) {
+                ps.setInt(1, idArret);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String nom = rs.getString("nomArret");
+                        float lattitude = rs.getFloat("lattitude");
+                        float longitude = rs.getFloat("longitude");
+
+                        arret = new Arret(idArret, nom, lattitude, longitude);
+                        arret.setLesPerturbations(this.getPerturbationUnArret(idArret));
+                        return arret;
+                    } else {
+                        return null; // aucun arret trouvé
+                    }
                 }
-            }
 
-        } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la recherche de l'arrêt ID=" + idArret + ". Détails:");
-            e.printStackTrace();
-            throw new Exception("Erreur lors de la recherche de l'arrêt avec ID : " + idArret, e);
+            } catch (Exception e) {
+                System.err.println("ERREUR BDD lors de la recherche de l'arrêt ID=" + idArret + ". Détails:");
+                e.printStackTrace();
+                throw new Exception("Erreur lors de la recherche de l'arrêt avec ID : " + idArret, e);
+            }
+        } else {
+            return arret;
         }
     }
 

@@ -1,6 +1,29 @@
 package metiers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Ligne {
+    // ---------------- Static ----------------
+    private static List<Ligne> lesLignesEnCache = new ArrayList<>();
+
+    public static Ligne getLigneEnCache(int idLigne) {
+        for(Ligne lignePresente : lesLignesEnCache) {
+            if (lignePresente.getId() == idLigne) {
+                return lignePresente;
+            }
+        }
+
+        // Si pas en cache
+        return null;
+    }
+
+    private static void addEnCache(Ligne uneLigne) {
+        lesLignesEnCache.add(uneLigne);
+    }
+
+    // ---------------- Objet ----------------
+
     private int id;
     private String libelle;
     private String hexColor;
@@ -60,9 +83,11 @@ public class Ligne {
         this.id = id;
         this.libelle = libelle;
         this.hexColor = hexColor;
-        TerminusDepart = terminusDepart;
-        TerminusArrivee = terminusArrivee;
+        this.TerminusDepart = terminusDepart;
+        this.TerminusArrivee = terminusArrivee;
         this.typeTransport = typeTransport;
+
+        Ligne.addEnCache(this);
     }
 
     @Override

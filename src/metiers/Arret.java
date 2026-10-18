@@ -5,6 +5,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Arret {
+    // ---------------- Static ----------------
+    private static List<Arret> lesArretsEnCache = new ArrayList<>();
+
+    public static Arret getArretEnCache(int idArret) {
+        for(Arret arretPresent : lesArretsEnCache) {
+            if (arretPresent.getId() == idArret) {
+                return arretPresent;
+            }
+        }
+
+        // Si pas en cache
+        return null;
+    }
+
+    private static void addEnCache(Arret unArret) {
+        lesArretsEnCache.add(unArret);
+    }
+
+    // ---------------- Objet ----------------
+
     private int id;
     private String nomArret;
     private float lattitude;
@@ -71,6 +91,8 @@ public class Arret {
         this.lattitude = lattitude;
         this.longitude = longitude;
         this.lesPerturbations = new ArrayList<>();
+
+        Arret.addEnCache(this);
     }
 
     public boolean estPerturbe(LocalDateTime instant) {
