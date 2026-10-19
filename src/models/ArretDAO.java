@@ -189,6 +189,9 @@ public class ArretDAO {
 
                 int arretsModifies = ps.executeUpdate();
 
+                if (arretsModifies > 0) {
+                    Arret.supprimerDuCache(arret);
+                }
                 return arretsModifies > 0;
 
             } catch (SQLException e) {

@@ -22,6 +22,10 @@ public class Ligne {
         lesLignesEnCache.add(uneLigne);
     }
 
+    public static void supprimerDuCache(Ligne ligne) {
+        lesLignesEnCache.removeIf(l -> l.getId() == ligne.getId());
+    }
+
     // ---------------- Objet ----------------
 
     private int id;

@@ -135,16 +135,22 @@ public class LigneDAO {
         }
     }
 
-    public boolean deleteLigne(int idLigne) throws Exception {
+    public boolean deleteLigne(Ligne ligne) throws Exception {
         String query = "DELETE FROM \"pitt-bdd\".ligne WHERE idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idLigne);
+            ps.setInt(1, ligne.getId());
 
-            return ps.executeUpdate() > 0;
+            int lignesModifies = ps.executeUpdate();
+
+            if (lignesModifies > 0) {
+                Ligne.supprimerDuCache(ligne);
+            }
+            return lignesModifies > 0;
+
         } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la suppression de la ligne ID=" + idLigne + ". Détails:");
+            System.err.println("ERREUR BDD lors de la suppression de la ligne ID=" + ligne.getId() + ". Détails:");
             e.printStackTrace();
-            throw new Exception("Erreur lors de la suppression de la ligne avec ID : " + idLigne, e);
+            throw new Exception("Erreur lors de la suppression de la ligne avec ID : " + ligne.getId(), e);
         }
     }
 }

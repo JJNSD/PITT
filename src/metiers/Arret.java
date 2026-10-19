@@ -23,6 +23,10 @@ public class Arret {
         lesArretsEnCache.add(unArret);
     }
 
+    public static void supprimerDuCache(Arret arret) {
+        lesArretsEnCache.removeIf(a -> a.getId() == arret.getId());
+    }
+
     // ---------------- Objet ----------------
 
     private int id;
