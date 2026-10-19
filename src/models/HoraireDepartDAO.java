@@ -61,16 +61,23 @@ public class HoraireDepartDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idHoraireDepart = rs.getInt("idhorairedepart");
-                    LocalTime heuredepart = rs.getObject("heuredepart", LocalTime.class);
-                    int idTypeHoraire = rs.getInt("idtypehoraire");
 
-                    TypeHoraire unType = typesDejaCharges.get(idTypeHoraire);
-                    if (unType == null) {
-                        unType = typeHoraireDAO.getTypeHoraireByID(idTypeHoraire);
-                        typesDejaCharges.put(idTypeHoraire, unType);
+                    // Gestion du cache
+                    HoraireDepart horaireDepart = HoraireDepart.getHoraireDepartEnCache(idHoraireDepart, uneLigne.getId());
+
+                    if (horaireDepart == null) {
+                        LocalTime heuredepart = rs.getObject("heuredepart", LocalTime.class);
+                        int idTypeHoraire = rs.getInt("idtypehoraire");
+
+                        TypeHoraire unType = typesDejaCharges.get(idTypeHoraire);
+                        if (unType == null) {
+                            unType = typeHoraireDAO.getTypeHoraireByID(idTypeHoraire);
+                            typesDejaCharges.put(idTypeHoraire, unType);
+                            horaireDepart = new HoraireDepart(idHoraireDepart, uneLigne, heuredepart, unType);
+                        }
                     }
 
-                    lesHoraires.add(new HoraireDepart(idHoraireDepart, uneLigne, heuredepart, unType));
+                    lesHoraires.add(horaireDepart);
                 }
             }
             return lesHoraires;
