@@ -9,15 +9,30 @@ public class Horaire {
     // ---------------- Static ----------------
     private static List<Horaire> lesHoraires = new ArrayList<>();
 
-    public static Horaire getHorairesEnCache(Ligne ligneAffecte, Arret arretAffecte) {
-        for(Horaire horaire : lesHoraires) {
+    public static List<Horaire> getHoraires(Arret arretAffecte, Ligne ligneAffecte) {
+        List<Horaire> resultat = new ArrayList<>();
+        for (Horaire horaire : lesHoraires) {
             if (horaire.getArretAffecte().getId() == arretAffecte.getId() && horaire.getLigneAffecte().getId() == ligneAffecte.getId()) {
-                return horaire;
+                resultat.add(horaire);
+            }
+        }
+        return resultat;
+    }
+
+    public static Horaire getHoraire(Arret arretAffecte, Ligne ligneAffecte, TypeHoraire unType, LocalTime heureArriveAlArret) {
+        Horaire prochain = null;
+
+        for (Horaire horaire : lesHoraires) {
+            if (horaire.getArretAffecte().getId() == arretAffecte.getId()
+                    && horaire.getLigneAffecte().getId() == ligneAffecte.getId()
+                    && horaire.getTypeHoraire() == unType
+                    && !horaire.getHeure().isBefore(heureArriveAlArret)
+                    && prochain == null) {
+                prochain = horaire;
             }
         }
 
-        // Si pas en cache
-        return null;
+        return prochain;
     }
 
     private static void addEnCache(Horaire horaire) {
