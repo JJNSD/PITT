@@ -34,17 +34,17 @@ public class DesserteDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+                    Arret arretPrecedent = arretDAO.getArretByID(rs.getInt("idArret_est_precede"));
+                    Arret arretSuivant = arretDAO.getArretByID(rs.getInt("idArret_est_suivi"));
+                    Ligne ligne = ligneDAO.getLigneByID(rs.getInt("idLigne"));
 
-                    int idArretPrecedent = rs.getInt("idArret_est_precede");
-                    int idArretSuivant = rs.getInt("idArret_est_suivi");
-                    int idLigne = rs.getInt("idLigne");
-                    int duree = rs.getInt("duree");
-                    int distance = rs.getInt("distance");
+                    // Gestion du cache
+                    Desserte desserte = Desserte.getDesserteEnCache(arretPrecedent, arretSuivant, ligne);
 
-                    Arret arretPrecedent = arretDAO.getArretByID(idArretPrecedent);
-                    Arret arretSuivant = arretDAO.getArretByID(idArretSuivant);
-                    Ligne ligne = ligneDAO.getLigneByID(idLigne);
-                    Desserte desserte = new Desserte(arretPrecedent, arretSuivant, ligne, duree, distance);
+                    if (desserte == null) {
+                        desserte = new Desserte(arretPrecedent, arretSuivant, ligne, rs.getInt("duree"), rs.getInt("distance"));
+                    }
+
                     lesDessertes.add(desserte);
                 }
             }
@@ -58,21 +58,15 @@ public class DesserteDAO {
     // 2. ID arrêt actuel + ID ligne -> arrêt suivant
     public Arret getArretSuivant(int idArretEnCours, int idLigne) throws Exception {
 
-        String query = "SELECT a.idArret, a.nomArret, a.lattitude, a.longitude FROM \"pitt-bdd\".desserte d JOIN \"pitt-bdd\".arret a ON a.idArret = d.idArret_est_suivi WHERE d.idArret_est_precede = ? AND d.idLigne = ?";
+        String query = "SELECT idArret_est_suivi FROM \"pitt-bdd\".desserte WHERE idArret_est_precede = ? AND idLigne = ?";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
-
             ps.setInt(1, idArretEnCours);
             ps.setInt(2, idLigne);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new Arret(
-                            rs.getInt("idArret"),
-                            rs.getString("nomArret"),
-                            rs.getFloat("lattitude"),
-                            rs.getFloat("longitude")
-                    );
+                    return arretDAO.getArretByID(rs.getInt("idArret_est_suivi"));
                 }
                 return null;
             }
@@ -85,7 +79,7 @@ public class DesserteDAO {
     // 3. ID ligne -> arrêts desservis
     public List<Desserte> getArretsDesservis(int idLigne) throws Exception {
 
-        List<Desserte> lesDesertes = new ArrayList<>();
+        List<Desserte> lesDessertes = new ArrayList<>();
 
         String query = "SELECT idArret_est_precede, idArret_est_suivi, duree, distance FROM \"pitt-bdd\".desserte WHERE idLigne = ?";
 
@@ -95,18 +89,21 @@ public class DesserteDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Desserte desserte = new Desserte(
-                            arretDAO.getArretByID(rs.getInt("idArret_est_precede")),
-                            arretDAO.getArretByID(rs.getInt("idArret_est_suivi")),
-                            ligneDAO.getLigneByID(idLigne),
-                            rs.getInt("duree"),
-                            rs.getInt("distance")
-                    );
+                    Arret arretPrecedent = arretDAO.getArretByID(rs.getInt("idArret_est_precede"));
+                    Arret arretSuivant = arretDAO.getArretByID(rs.getInt("idArret_est_suivi"));
+                    Ligne ligne = ligneDAO.getLigneByID(rs.getInt("idLigne"));
 
-                    lesDesertes.add(desserte);
+                    // Gestion du cache
+                    Desserte desserte = Desserte.getDesserteEnCache(arretPrecedent, arretSuivant, ligne);
+
+                    if (desserte == null) {
+                        desserte = new Desserte(arretPrecedent, arretSuivant, ligne, rs.getInt("duree"), rs.getInt("distance"));
+                    }
+
+                    lesDessertes.add(desserte);
                 }
             }
-            return lesDesertes;
+            return lesDessertes;
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("Erreur lors de la recherche des arrêts desservis.", e);
@@ -115,29 +112,36 @@ public class DesserteDAO {
 
     // 4. ID arrêt actuel + ID arrêt suivant + ID ligne -> durée et distance
     public Desserte getDureeDistance(int idArretActuel, int idArretSuivant, int idLigne) throws Exception {
+        // Vérification du cache
+        Desserte desserte = Desserte.getDesserteEnCacheByID(idArretActuel, idArretSuivant, idLigne);
 
-        String query = "SELECT idArret_est_suivi, idLigne, duree, distance FROM \"pitt-bdd\".desserte WHERE idArret_est_precede = ? AND idArret_est_suivi = ? AND idLigne = ?";
+        if (desserte == null) {
 
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+            String query = "SELECT idArret_est_suivi, idLigne, duree, distance FROM \"pitt-bdd\".desserte WHERE idArret_est_precede = ? AND idArret_est_suivi = ? AND idLigne = ?";
 
-            ps.setInt(1, idArretActuel);
-            ps.setInt(2, idArretSuivant);
-            ps.setInt(3, idLigne);
+            try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Arret arretPrecedent = arretDAO.getArretByID(idArretActuel);
-                    Arret arretSuivant = arretDAO.getArretByID(idArretSuivant);
-                    Ligne ligne = ligneDAO.getLigneByID(idLigne);
+                ps.setInt(1, idArretActuel);
+                ps.setInt(2, idArretSuivant);
+                ps.setInt(3, idLigne);
 
-                    return new Desserte(arretPrecedent, arretSuivant, ligne, rs.getInt("duree"), rs.getInt("distance")
-                    );
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        Arret arretPrecedent = arretDAO.getArretByID(idArretActuel);
+                        Arret arretSuivant = arretDAO.getArretByID(idArretSuivant);
+                        Ligne ligne = ligneDAO.getLigneByID(idLigne);
+
+                        desserte = new Desserte(arretPrecedent, arretSuivant, ligne, rs.getInt("duree"), rs.getInt("distance"));
+                        return desserte;
+                    }
+                    return null;
                 }
-                return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new Exception("Erreur lors de la recherche de la durée et de la distance.", e);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Exception("Erreur lors de la recherche de la durée et de la distance.", e);
+        } else {
+            return desserte;
         }
     }
 
@@ -151,13 +155,17 @@ public class DesserteDAO {
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Desserte desserte = new Desserte(
-                            arretDAO.getArretByID(rs.getInt("idArret_est_precede")),
-                            arretDAO.getArretByID(rs.getInt("idArret_est_suivi")),
-                            ligneDAO.getLigneByID(rs.getInt("idLigne")),
-                            rs.getInt("duree"),
-                            rs.getInt("distance")
-                    );
+                    Arret arretPrecedent = arretDAO.getArretByID(rs.getInt("idArret_est_precede"));
+                    Arret arretSuivant = arretDAO.getArretByID(rs.getInt("idArret_est_suivi"));
+                    Ligne ligne = ligneDAO.getLigneByID(rs.getInt("idLigne"));
+
+                    // Gestion du cache
+                    Desserte desserte = Desserte.getDesserteEnCache(arretPrecedent, arretSuivant, ligne);
+
+                    if (desserte == null) {
+                        desserte = new Desserte(arretPrecedent, arretSuivant, ligne, rs.getInt("duree"), rs.getInt("distance"));
+                    }
+
                     lesDesertes.add(desserte);
                 }
             }

@@ -7,6 +7,17 @@ public class Desserte {
     // ---------------- Static ----------------
     private static List<Desserte> lesDessertesEnCache = new ArrayList<>();
 
+    public static Desserte getDesserteEnCacheByID(int idArretPrecedent, int idArretSuivant, int idLigne) {
+        for(Desserte desserte : lesDessertesEnCache) {
+            if (desserte.getArretPrecedent().getId() == idArretPrecedent && desserte.getArretSuivant().getId() == idArretSuivant && desserte.getLigne().getId() == idLigne) {
+                return desserte;
+            }
+        }
+
+        // Si pas en cache
+        return null;
+    }
+
     public static Desserte getDesserteEnCache(Arret arretPrecedent, Arret arretSuivant, Ligne ligne) {
         for(Desserte desserte : lesDessertesEnCache) {
             if (desserte.getArretPrecedent().getId() == arretPrecedent.getId() && desserte.getArretSuivant().getId() == arretSuivant.getId() && desserte.getLigne().getId() == ligne.getId()) {
