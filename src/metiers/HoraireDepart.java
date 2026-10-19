@@ -23,6 +23,10 @@ public class HoraireDepart {
         lesHorairesDepartEnCache.add(horaireDepart);
     }
 
+    public static void supprimerDuCache(HoraireDepart horaire) {
+        lesHorairesDepartEnCache.removeIf(h -> h.getId() == horaire.getId());
+    }
+
     // ---------------- Objet ----------------
 
     private int id;

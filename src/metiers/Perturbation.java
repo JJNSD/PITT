@@ -23,6 +23,10 @@ public class Perturbation {
         lesPerturbationsEnCache.add(unePerturbation);
     }
 
+    public static void supprimerDuCache(Perturbation perturbation) {
+        lesPerturbationsEnCache.removeIf(p -> p.getId() == perturbation.getId());
+    }
+
     // ---------------- Objet ----------------
 
     private int id;

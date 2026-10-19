@@ -1,6 +1,7 @@
 package models;
 
 import metiers.Arret;
+import metiers.HoraireDepart;
 import metiers.Perturbation;
 
 import java.sql.Connection;
@@ -200,9 +201,12 @@ public class PerturbationDAO {
 
                 ps.setInt(1, perturbation.getId());
 
-                int perturbationsModifiees = ps.executeUpdate();
+                int PerturbationModifie = ps.executeUpdate();
 
-                return perturbationsModifiees > 0;
+                if (PerturbationModifie > 0) {
+                    Perturbation.supprimerDuCache(perturbation);
+                }
+                return PerturbationModifie > 0;
             } catch (SQLException e) {
                 System.err.println("ERREUR BDD lors de la suppression de la perturbation ID=" + perturbation.getId() + ". Détails:");
                 e.printStackTrace();

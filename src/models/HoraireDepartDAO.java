@@ -1,5 +1,6 @@
 package models;
 
+import metiers.Arret;
 import metiers.HoraireDepart;
 import metiers.Ligne;
 import metiers.TypeHoraire;
@@ -122,17 +123,22 @@ public class HoraireDepartDAO {
      * Supprime un horaire de départ.
      * @return true si une ligne a été supprimée, false si l'horaire n'existe pas
      */
-    public boolean deleteHoraireDepart(int idHoraireDepart, Ligne uneLigne) throws Exception {
+    public boolean deleteHoraireDepart(HoraireDepart horaire, Ligne uneLigne) throws Exception {
         String query = "DELETE FROM \"pitt-bdd\".horairedepart WHERE idhorairedepart = ? AND idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idHoraireDepart);
+            ps.setInt(1, horaire.getId());
             ps.setInt(2, uneLigne.getId());
 
-            return ps.executeUpdate() > 0;
+            int HoraireModifie = ps.executeUpdate();
+
+            if (HoraireModifie > 0) {
+                HoraireDepart.supprimerDuCache(horaire);
+            }
+            return HoraireModifie > 0;
         } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la suppression de l'horaire ID=" + idHoraireDepart + ". Détails:");
+            System.err.println("ERREUR BDD lors de la suppression de l'horaire ID=" + horaire.getId() + ". Détails:");
             e.printStackTrace();
-            throw new Exception("Erreur lors de la suppression de l'horaire avec ID : " + idHoraireDepart, e);
+            throw new Exception("Erreur lors de la suppression de l'horaire avec ID : " + horaire.getId(), e);
         }
     }
 }

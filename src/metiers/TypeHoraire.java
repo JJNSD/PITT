@@ -22,6 +22,10 @@ public class TypeHoraire {
         lesTypesHorairesEnCache.add(typeHoraire);
     }
 
+    public static void supprimerDuCache(TypeHoraire typeHoraire) {
+        lesTypesHorairesEnCache.removeIf(t -> t.getId() == typeHoraire.getId());
+    }
+
     // ---------------- Objet ----------------
 
     private int id;

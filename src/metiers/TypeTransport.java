@@ -22,6 +22,10 @@ public class TypeTransport {
         lesTypesTransportEnCache.add(unTypeTransport);
     }
 
+    public static void supprimerDuCache(TypeTransport typeTransport) {
+        lesTypesTransportEnCache.removeIf(t -> t.getId() == typeTransport.getId());
+    }
+
     // ---------------- Objet ----------------
 
     private int id;

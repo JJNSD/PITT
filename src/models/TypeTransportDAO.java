@@ -1,5 +1,6 @@
 package models;
 
+import metiers.TypeHoraire;
 import metiers.TypeTransport;
 
 import java.sql.Connection;
@@ -98,16 +99,21 @@ public class TypeTransportDAO {
         }
     }
 
-    public boolean deleteTypeTransport(int idTypeTransport) throws Exception {
+    public boolean deleteTypeTransport(TypeTransport typeTransport) throws Exception {
         String query = "DELETE FROM \"pitt-bdd\".typetransport WHERE idtypetransport = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idTypeTransport);
+            ps.setInt(1, typeTransport.getId());
 
-            return ps.executeUpdate() > 0;
+            int TypeTransportModifie = ps.executeUpdate();
+
+            if (TypeTransportModifie > 0) {
+                TypeTransport.supprimerDuCache(typeTransport);
+            }
+            return TypeTransportModifie > 0;
         } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la suppression du type de transport ID=" + idTypeTransport + ". Détails:");
+            System.err.println("ERREUR BDD lors de la suppression du type de transport ID=" + typeTransport.getId() + ". Détails:");
             e.printStackTrace();
-            throw new Exception("Erreur lors de la suppression du type de transport avec ID : " + idTypeTransport, e);
+            throw new Exception("Erreur lors de la suppression du type de transport avec ID : " + typeTransport.getId(), e);
         }
     }
 }

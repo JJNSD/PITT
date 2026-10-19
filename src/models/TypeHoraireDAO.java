@@ -1,6 +1,7 @@
 package models;
 
 import metiers.Arret;
+import metiers.Perturbation;
 import metiers.TypeHoraire;
 
 import java.sql.Connection;
@@ -96,16 +97,21 @@ public class TypeHoraireDAO {
         }
     }
 
-    public boolean deleteTypeHoraire (int idTypeHoraire) throws Exception {
+    public boolean deleteTypeHoraire (TypeHoraire typeHoraire) throws Exception {
         String query = "DELETE FROM \"pitt-bdd\".typehoraire WHERE idtypehoraire = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idTypeHoraire);
+            ps.setInt(1, typeHoraire.getId());
 
-            return ps.executeUpdate() > 0;
+            int TypeHoraireModifie = ps.executeUpdate();
+
+            if (TypeHoraireModifie > 0) {
+                TypeHoraire.supprimerDuCache(typeHoraire);
+            }
+            return TypeHoraireModifie > 0;
         } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la suppression du type d'horaire ID=" + idTypeHoraire + ". Détails:");
+            System.err.println("ERREUR BDD lors de la suppression du type d'horaire ID=" + typeHoraire.getId() + ". Détails:");
             e.printStackTrace();
-            throw new Exception("Erreur lors de la suppression du type d'horaire avec ID : " + idTypeHoraire, e);
+            throw new Exception("Erreur lors de la suppression du type d'horaire avec ID : " + typeHoraire.getId(), e);
         }
     }
 }
