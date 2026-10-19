@@ -1,5 +1,6 @@
 package models;
 
+import metiers.Arret;
 import metiers.HoraireDepart;
 import metiers.Ligne;
 import metiers.TypeHoraire;
@@ -22,27 +23,34 @@ public class HoraireDepartDAO {
     public HoraireDepartDAO() { this.connexion = ConnexionBDD.getConnexion(); }
 
     public HoraireDepart getHoraireDepartByID(int idHoraireDepart, Ligne uneLigne) throws Exception {
+        // Vérification du cache
+        HoraireDepart horaireDepart = HoraireDepart.getHoraireDepartEnCache(idHoraireDepart, uneLigne.getId());
 
-        String query = "SELECT heuredepart, idtypehoraire FROM \"pitt-bdd\".horairedepart WHERE idhorairedepart = ? AND idligne = ?";
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idHoraireDepart);
-            ps.setInt(2, uneLigne.getId());
+        if (horaireDepart == null) {
+            String query = "SELECT heuredepart, idtypehoraire FROM \"pitt-bdd\".horairedepart WHERE idhorairedepart = ? AND idligne = ?";
+            try (PreparedStatement ps = connexion.prepareStatement(query)) {
+                ps.setInt(1, idHoraireDepart);
+                ps.setInt(2, uneLigne.getId());
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    LocalTime heuredepart = rs.getObject("heuredepart", LocalTime.class);
-                    int idTypeHoraire = rs.getInt("idtypehoraire");
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        LocalTime heuredepart = rs.getObject("heuredepart", LocalTime.class);
+                        int idTypeHoraire = rs.getInt("idtypehoraire");
 
-                    TypeHoraire unType = typeHoraireDAO.getTypeHoraireByID(idTypeHoraire);
-                    return new HoraireDepart(idHoraireDepart, uneLigne, heuredepart, unType);
-                } else {
-                    return null; // aucun horaire trouvé
+                        TypeHoraire unType = typeHoraireDAO.getTypeHoraireByID(idTypeHoraire);
+                        horaireDepart = new HoraireDepart(idHoraireDepart, uneLigne, heuredepart, unType);
+                        return horaireDepart;
+                    } else {
+                        return null; // aucun horaire trouvé
+                    }
                 }
+            } catch (Exception e) {
+                System.err.println("ERREUR BDD lors de la recherche de l'horaire ID=" + idHoraireDepart + ". Détails:");
+                e.printStackTrace();
+                throw new Exception("Erreur lors de la recherche de l'horaire avec ID : " + idHoraireDepart, e);
             }
-        } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la recherche de l'horaire ID=" + idHoraireDepart + ". Détails:");
-            e.printStackTrace();
-            throw new Exception("Erreur lors de la recherche de l'horaire avec ID : " + idHoraireDepart, e);
+        } else {
+            return horaireDepart;
         }
     }
 

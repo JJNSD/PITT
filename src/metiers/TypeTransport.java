@@ -1,6 +1,29 @@
 package metiers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TypeTransport {
+    // ---------------- Static ----------------
+    private static List<TypeTransport> lesTypesTransportEnCache = new ArrayList<>();
+
+    public static TypeTransport getTypeTransportEnCache(int idTypeTransport) {
+        for(TypeTransport typeTransport : lesTypesTransportEnCache) {
+            if (typeTransport.getId() == idTypeTransport) {
+                return typeTransport;
+            }
+        }
+
+        // Si pas en cache
+        return null;
+    }
+
+    private static void addEnCache(TypeTransport unTypeTransport) {
+        lesTypesTransportEnCache.add(unTypeTransport);
+    }
+
+    // ---------------- Objet ----------------
+
     private int id;
     private String nomType;
     private float cout;

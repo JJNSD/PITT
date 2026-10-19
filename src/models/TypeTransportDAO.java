@@ -16,27 +16,33 @@ public class TypeTransportDAO {
     }
 
     public TypeTransport getTypeTransportByID(int idTypeTransport) throws Exception {
+        // Vérification du cache
+        TypeTransport typeTransport = TypeTransport.getTypeTransportEnCache(idTypeTransport);
 
-        String query = "SELECT idtypetransport, libelletypetransport, cout FROM \"pitt-bdd\".typetransport WHERE idtypetransport = ?";
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idTypeTransport);
+        if (typeTransport == null) {
+            String query = "SELECT idtypetransport, libelletypetransport, cout FROM \"pitt-bdd\".typetransport WHERE idtypetransport = ?";
+            try (PreparedStatement ps = connexion.prepareStatement(query)) {
+                ps.setInt(1, idTypeTransport);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String libelletypetransport = rs.getString("libelletypetransport");
-                    float cout = rs.getFloat("cout");
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String libelletypetransport = rs.getString("libelletypetransport");
+                        float cout = rs.getFloat("cout");
 
-                   TypeTransport transport = new TypeTransport(idTypeTransport, libelletypetransport, cout);
-                   return transport;
-                } else {
-                    return null;
+                        TypeTransport transport = new TypeTransport(idTypeTransport, libelletypetransport, cout);
+                        return transport;
+                    } else {
+                        return null;
+                    }
                 }
-            }
 
-        } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la recherche du type de transport ID=" + idTypeTransport + ". Détails:");
-            e.printStackTrace();
-            throw new Exception("Erreur lors de la recherche du type de transport avec ID : " + idTypeTransport, e);
+            } catch (Exception e) {
+                System.err.println("ERREUR BDD lors de la recherche du type de transport ID=" + idTypeTransport + ". Détails:");
+                e.printStackTrace();
+                throw new Exception("Erreur lors de la recherche du type de transport avec ID : " + idTypeTransport, e);
+            }
+        } else {
+            return typeTransport;
         }
     }
 
