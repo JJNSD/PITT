@@ -5,6 +5,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Perturbation {
+    // ---------------- Static ----------------
+    private static List<Perturbation> lesPerturbationsEnCache = new ArrayList<>();
+
+    public static Perturbation getPerturbationEnCache(int idPerturbation) {
+        for(Perturbation perturbation : lesPerturbationsEnCache) {
+            if (perturbation.getId() == idPerturbation) {
+                return perturbation;
+            }
+        }
+
+        // Si pas en cache
+        return null;
+    }
+
+    private static void addEnCache(Perturbation unePerturbation) {
+        lesPerturbationsEnCache.add(unePerturbation);
+    }
+
+    // ---------------- Objet ----------------
+
     private int id;
     private String libelle;
 
@@ -72,5 +92,7 @@ public class Perturbation {
         this.dateHeureFin = dateHeureFin;
 
         this.arretsPerturbes = new ArrayList<>();
+
+        Perturbation.addEnCache(this);
     }
 }

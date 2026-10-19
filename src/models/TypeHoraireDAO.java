@@ -1,5 +1,6 @@
 package models;
 
+import metiers.Arret;
 import metiers.TypeHoraire;
 
 import java.sql.Connection;
@@ -17,26 +18,32 @@ public class TypeHoraireDAO {
     }
 
     public TypeHoraire getTypeHoraireByID(int idTypeHoraire) throws Exception {
+        // Vérification du cache
+        TypeHoraire typeHoraire = TypeHoraire.getTypeHoraireEnCache(idTypeHoraire);
 
-        String query = "SELECT libelle FROM \"pitt-bdd\".typehoraire WHERE idtypehoraire = ?";
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idTypeHoraire);
+        if (typeHoraire == null) {
+            String query = "SELECT libelle FROM \"pitt-bdd\".typehoraire WHERE idtypehoraire = ?";
+            try (PreparedStatement ps = connexion.prepareStatement(query)) {
+                ps.setInt(1, idTypeHoraire);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String libelle = rs.getString("libelle");
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String libelle = rs.getString("libelle");
 
-                    TypeHoraire horaire = new TypeHoraire(idTypeHoraire, libelle);
-                    return horaire;
-                } else {
-                    return null;
+                        typeHoraire = new TypeHoraire(idTypeHoraire, libelle);
+                        return typeHoraire;
+                    } else {
+                        return null;
+                    }
                 }
-            }
 
-        } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la recherche du type d'horaire ID=" + idTypeHoraire + ". Détails:");
-            e.printStackTrace();
-            throw new Exception("Erreur lors de la recherche du type d'horaire avec ID : " + idTypeHoraire, e);
+            } catch (Exception e) {
+                System.err.println("ERREUR BDD lors de la recherche du type d'horaire ID=" + idTypeHoraire + ". Détails:");
+                e.printStackTrace();
+                throw new Exception("Erreur lors de la recherche du type d'horaire avec ID : " + idTypeHoraire, e);
+            }
+        } else {
+            return typeHoraire;
         }
     }
 

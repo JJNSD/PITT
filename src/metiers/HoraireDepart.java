@@ -1,8 +1,30 @@
 package metiers;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HoraireDepart {
+    // ---------------- Static ----------------
+    private static List<HoraireDepart> lesHorairesDepartEnCache = new ArrayList<>();
+
+    public static HoraireDepart getHoraireDepartEnCache(int idHoraireDepart, int idLigne) {
+        for(HoraireDepart horaireDepart : lesHorairesDepartEnCache) {
+            if (horaireDepart.getId() == idHoraireDepart && horaireDepart.getLigneAffecte().getId() == idLigne) {
+                return horaireDepart;
+            }
+        }
+
+        // Si pas en cache
+        return null;
+    }
+
+    private static void addEnCache(HoraireDepart horaireDepart) {
+        lesHorairesDepartEnCache.add(horaireDepart);
+    }
+
+    // ---------------- Objet ----------------
+
     private int id;
     private Ligne ligneAffecte;
     private LocalTime heureDepart;
@@ -45,5 +67,7 @@ public class HoraireDepart {
         this.ligneAffecte = ligneAffecte;
         this.heureDepart = heureDepart;
         this.typeHoraire = typeHoraire;
+
+        HoraireDepart.addEnCache(this);
     }
 }

@@ -1,6 +1,29 @@
 package metiers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TypeHoraire {
+    // ---------------- Static ----------------
+    private static List<TypeHoraire> lesTypesHorairesEnCache = new ArrayList<>();
+
+    public static TypeHoraire getTypeHoraireEnCache(int idTypeHoraire) {
+        for(TypeHoraire typeHoraire : lesTypesHorairesEnCache) {
+            if (typeHoraire.getId() == idTypeHoraire) {
+                return typeHoraire;
+            }
+        }
+
+        // Si pas en cache
+        return null;
+    }
+
+    private static void addEnCache(TypeHoraire typeHoraire) {
+        lesTypesHorairesEnCache.add(typeHoraire);
+    }
+
+    // ---------------- Objet ----------------
+
     private int id;
     private String libelle;
 
@@ -23,5 +46,7 @@ public class TypeHoraire {
     public TypeHoraire(int id, String libelle) {
         this.id = id;
         this.libelle = libelle;
+
+        TypeHoraire.addEnCache(this);
     }
 }

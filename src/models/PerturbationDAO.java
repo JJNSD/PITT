@@ -57,42 +57,49 @@ public class PerturbationDAO {
     }
 
     public Perturbation getPerturbationByID(int idPerturbation) throws Exception {
-        String query = "SELECT libelle, dateHeureDebut, dateHeureFin FROM \"pitt-bdd\".perturbation WHERE idPerturbation = ?";
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, idPerturbation);
+        // Vérification du cache
+        Perturbation perturbation = Perturbation.getPerturbationEnCache(idPerturbation);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String libelle = rs.getString("libelle");
-                    String dateHeureDebutString = rs.getString("dateHeureDebut");
-                    String dateHeureFinString = rs.getString("dateHeureFin");
+        if (perturbation == null) {
+            String query = "SELECT libelle, dateHeureDebut, dateHeureFin FROM \"pitt-bdd\".perturbation WHERE idPerturbation = ?";
+            try (PreparedStatement ps = connexion.prepareStatement(query)) {
+                ps.setInt(1, idPerturbation);
 
-                    LocalDateTime dateHeureDebut;
-                    LocalDateTime dateHeureFin;
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String libelle = rs.getString("libelle");
+                        String dateHeureDebutString = rs.getString("dateHeureDebut");
+                        String dateHeureFinString = rs.getString("dateHeureFin");
 
-                    if (dateHeureDebutString != null) {
-                        dateHeureDebut = LocalDateTime.parse(dateHeureDebutString);
+                        LocalDateTime dateHeureDebut;
+                        LocalDateTime dateHeureFin;
+
+                        if (dateHeureDebutString != null) {
+                            dateHeureDebut = LocalDateTime.parse(dateHeureDebutString);
+                        } else {
+                            dateHeureDebut = null;
+                        }
+                        if (dateHeureDebutString != null) {
+                            dateHeureFin = LocalDateTime.parse(dateHeureFinString);
+                        } else {
+                            dateHeureFin = null;
+                        }
+
+                        perturbation = new Perturbation(idPerturbation, libelle, dateHeureDebut, dateHeureFin);
+                        perturbation.setArretsPerturbes(this.getArretsPerturbes(idPerturbation));
+                        return perturbation;
                     } else {
-                        dateHeureDebut = null;
+                        return null; // aucune perturbation trouvée
                     }
-                    if (dateHeureDebutString != null) {
-                        dateHeureFin = LocalDateTime.parse(dateHeureFinString);
-                    } else {
-                        dateHeureFin = null;
-                    }
-
-                    Perturbation perturbation = new Perturbation(idPerturbation, libelle, dateHeureDebut, dateHeureFin);
-                    perturbation.setArretsPerturbes(this.getArretsPerturbes(idPerturbation));
-                    return perturbation;
-                } else {
-                    return null; // aucune perturbation trouvée
                 }
-            }
 
-        } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la recherche de la perturbation ID=" + idPerturbation + ". Détails:");
-            e.printStackTrace();
-            throw new Exception("Erreur lors de la recherche de la perturbation avec ID : " + idPerturbation, e);
+            } catch (Exception e) {
+                System.err.println("ERREUR BDD lors de la recherche de la perturbation ID=" + idPerturbation + ". Détails:");
+                e.printStackTrace();
+                throw new Exception("Erreur lors de la recherche de la perturbation avec ID : " + idPerturbation, e);
+            }
+        } else {
+            return perturbation;
         }
     }
 

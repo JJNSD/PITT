@@ -1,6 +1,29 @@
 package metiers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Desserte {
+    // ---------------- Static ----------------
+    private static List<Desserte> lesDessertesEnCache = new ArrayList<>();
+
+    public static Desserte getDesserteEnCache(Arret arretPrecedent, Arret arretSuivant, Ligne ligne) {
+        for(Desserte desserte : lesDessertesEnCache) {
+            if (desserte.getArretPrecedent().getId() == arretPrecedent.getId() && desserte.getArretSuivant().getId() == arretSuivant.getId() && desserte.getLigne().getId() == ligne.getId()) {
+                return desserte;
+            }
+        }
+
+        // Si pas en cache
+        return null;
+    }
+
+    private static void addEnCache(Desserte uneDesserte) {
+        lesDessertesEnCache.add(uneDesserte);
+    }
+
+    // ---------------- Objet ----------------
+
     private Arret arretPrecedent;
     private Arret arretSuivant;
     private Ligne ligne;
@@ -53,5 +76,7 @@ public class Desserte {
         this.ligne = ligne;
         this.duree = duree;
         this.distance = distance;
+
+        Desserte.addEnCache(this);
     }
 }
