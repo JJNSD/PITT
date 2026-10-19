@@ -54,11 +54,18 @@ public class TypeTransportDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idTypeTransport = rs.getInt("idtypetransport");
-                    String libelletypetransport = rs.getString("libelletypetransport");
-                    float cout = rs.getFloat("cout");
 
-                    TypeTransport transport = new TypeTransport(idTypeTransport, libelletypetransport, cout);
-                    lesTransports.add(transport);
+                    // Gestion du cache
+                    TypeTransport typeTransport = TypeTransport.getTypeTransportEnCache(idTypeTransport);
+
+                    if (typeTransport == null) {
+                        String libelletypetransport = rs.getString("libelletypetransport");
+                        float cout = rs.getFloat("cout");
+
+                        typeTransport = new TypeTransport(idTypeTransport, libelletypetransport, cout);
+                    }
+
+                    lesTransports.add(typeTransport);
                 }
             }
             return lesTransports;

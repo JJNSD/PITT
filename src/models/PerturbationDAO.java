@@ -111,26 +111,33 @@ public class PerturbationDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idPerturbation = rs.getInt("idPerturbation");
-                    String libelle = rs.getString("libelle");
-                    String dateHeureDebutString = rs.getString("dateHeureDebut");
-                    String dateHeureFinString = rs.getString("dateHeureFin");
 
-                    LocalDateTime dateHeureDebut;
-                    LocalDateTime dateHeureFin;
+                    // Gestion du cache
+                    Perturbation perturbation = Perturbation.getPerturbationEnCache(idPerturbation);
 
-                    if (dateHeureDebutString != null) {
-                        dateHeureDebut = LocalDateTime.parse(dateHeureDebutString);
-                    } else {
-                        dateHeureDebut = null;
+                    if (perturbation == null) {
+                        String libelle = rs.getString("libelle");
+                        String dateHeureDebutString = rs.getString("dateHeureDebut");
+                        String dateHeureFinString = rs.getString("dateHeureFin");
+
+                        LocalDateTime dateHeureDebut;
+                        LocalDateTime dateHeureFin;
+
+                        if (dateHeureDebutString != null) {
+                            dateHeureDebut = LocalDateTime.parse(dateHeureDebutString);
+                        } else {
+                            dateHeureDebut = null;
+                        }
+                        if (dateHeureDebutString != null) {
+                            dateHeureFin = LocalDateTime.parse(dateHeureFinString);
+                        } else {
+                            dateHeureFin = null;
+                        }
+
+                        perturbation = new Perturbation(idPerturbation, libelle, dateHeureDebut, dateHeureFin);
+                        perturbation.setArretsPerturbes(this.getArretsPerturbes(idPerturbation));
                     }
-                    if (dateHeureDebutString != null) {
-                        dateHeureFin = LocalDateTime.parse(dateHeureFinString);
-                    } else {
-                        dateHeureFin = null;
-                    }
 
-                    Perturbation perturbation = new Perturbation(idPerturbation, libelle, dateHeureDebut, dateHeureFin);
-                    perturbation.setArretsPerturbes(this.getArretsPerturbes(idPerturbation));
                     lesPerturbations.add(perturbation);
                 }
             }

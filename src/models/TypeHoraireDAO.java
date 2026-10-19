@@ -55,10 +55,17 @@ public class TypeHoraireDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idTypeHoraire = rs.getInt("idtypehoraire");
-                    String libelle = rs.getString("libelle");
 
-                    TypeHoraire horaire = new TypeHoraire(idTypeHoraire, libelle);
-                    lesHoraires.add(horaire);
+                    // Gestion du cache
+                    TypeHoraire typeHoraire = TypeHoraire.getTypeHoraireEnCache(idTypeHoraire);
+
+                    if (typeHoraire == null) {
+                        String libelle = rs.getString("libelle");
+
+                        typeHoraire = new TypeHoraire(idTypeHoraire, libelle);
+                    }
+
+                    lesHoraires.add(typeHoraire);
                 }
             }
             return lesHoraires;

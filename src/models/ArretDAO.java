@@ -111,12 +111,19 @@ public class ArretDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idArret = rs.getInt("idArret");
-                    String nom = rs.getString("nomArret");
-                    float lattitude = rs.getFloat("lattitude");
-                    float longitude = rs.getFloat("longitude");
 
-                    Arret arret = new Arret(idArret, nom, lattitude, longitude);
-                    arret.setLesPerturbations(this.getPerturbationUnArret(idArret));
+                    // Gestion du cache
+                    Arret arret = Arret.getArretEnCache(idArret);
+
+                    if (arret == null) {
+                        String nom = rs.getString("nomArret");
+                        float lattitude = rs.getFloat("lattitude");
+                        float longitude = rs.getFloat("longitude");
+
+                        arret = new Arret(idArret, nom, lattitude, longitude);
+                        arret.setLesPerturbations(this.getPerturbationUnArret(idArret));
+                    }
+
                     lesArrets.add(arret);
                 }
             }
