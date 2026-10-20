@@ -147,7 +147,7 @@ public class Graphe {
                     Arret arretSuivantDepart = this.getArretSuivant(arretPrecedentDepart, arretActuelDepart, ligne);
 
                     LocalTime horaireSensDepart = null;
-                    while (arretActuelDepart.getId() != ligne.getTerminusArrivee().getId()) {
+                    while (arretActuelDepart.getId() != ligne.getTerminusArrivee().getId() && arretSuivantDepart != null) {
                         Desserte desserte = desserteDAO.getDureeDistance(arretActuelDepart.getId(), arretSuivantDepart.getId(), ligne.getId());
 
                         if (horaireSensDepart != null) {
@@ -170,7 +170,7 @@ public class Graphe {
                     Arret arretSuivantArrivee= this.getArretSuivant(arretPrecedentArrivee, arretActuelArrivee, ligne);
 
                     LocalTime horaireSensArrivee = null;
-                    while (arretActuelArrivee.getId() != ligne.getTerminusDepart().getId()) {
+                    while (arretActuelArrivee.getId() != ligne.getTerminusDepart().getId() && arretSuivantArrivee != null) {
                         Desserte desserte = desserteDAO.getDureeDistance(arretActuelArrivee.getId(), arretSuivantArrivee.getId(), ligne.getId());
 
                         if (horaireSensArrivee == null) {
