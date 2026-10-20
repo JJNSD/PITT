@@ -56,40 +56,29 @@ public class LigneDAO {
 
     public List<Ligne> getAllLigne() throws Exception {
         List<Ligne> lesLignes = new ArrayList<>();
-        // caches pour ne pas recharger plusieurs fois le même arrêt / type de transport
-        Map<Integer, Arret> arretsCharges = new HashMap<>();
-        Map<Integer, TypeTransport> typesCharges = new HashMap<>();
 
         String query = "SELECT idligne, libelle, hexcolor, idtypetransport, idarretdepart, idarretarrivee FROM \"pitt-bdd\".ligne";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int idLigne = rs.getInt("idligne");
-                    String libelle = rs.getString("libelle");
-                    String hexcolor = rs.getString("hexcolor");
-                    int idType = rs.getInt("idtypetransport");
-                    int idDepart = rs.getInt("idarretdepart");
-                    int idArrivee = rs.getInt("idarretarrivee");
 
-                    TypeTransport type = typesCharges.get(idType);
-                    if (type == null) {
-                        type = typeTransportDAO.getTypeTransportByID(idType);
-                        typesCharges.put(idType, type);
+                    Ligne uneLigne = Ligne.getLigneEnCache(idLigne);
+
+                    if (uneLigne == null) {
+                        String libelle = rs.getString("libelle");
+                        String hexcolor = rs.getString("hexcolor");
+                        int idType = rs.getInt("idtypetransport");
+                        int idDepart = rs.getInt("idarretdepart");
+                        int idArrivee = rs.getInt("idarretarrivee");
+                        TypeTransport type = typeTransportDAO.getTypeTransportByID(idType);
+                        Arret depart =  arretDAO.getArretByID(idDepart);
+                        Arret arrivee = arretDAO.getArretByID(idArrivee);
+
+                        uneLigne = new Ligne(idLigne, libelle, hexcolor, depart, arrivee, type);
                     }
 
-                    Arret depart = arretsCharges.get(idDepart);
-                    if (depart == null) {
-                        depart = arretDAO.getArretByID(idDepart);
-                        arretsCharges.put(idDepart, depart);
-                    }
-
-                    Arret arrivee = arretsCharges.get(idArrivee);
-                    if (arrivee == null) {
-                        arrivee = arretDAO.getArretByID(idArrivee);
-                        arretsCharges.put(idArrivee, arrivee);
-                    }
-
-                    lesLignes.add(new Ligne(idLigne, libelle, hexcolor, depart, arrivee, type));
+                    lesLignes.add(uneLigne);
                 }
             }
             return lesLignes;

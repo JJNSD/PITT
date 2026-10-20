@@ -52,7 +52,6 @@ public class HoraireDepartDAO {
      */
     public List<HoraireDepart> getAllHoraireDepartByLigne(Ligne uneLigne) throws Exception {
         List<HoraireDepart> lesHoraires = new ArrayList<>();
-        Map<Integer, TypeHoraire> typesDejaCharges = new HashMap<>(); // évite de recharger le même type
 
         String query = "SELECT idhorairedepart, heuredepart, idtypehoraire FROM \"pitt-bdd\".horairedepart WHERE idligne = ? ORDER BY heuredepart";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
@@ -68,13 +67,8 @@ public class HoraireDepartDAO {
                     if (horaireDepart == null) {
                         LocalTime heuredepart = rs.getObject("heuredepart", LocalTime.class);
                         int idTypeHoraire = rs.getInt("idtypehoraire");
-
-                        TypeHoraire unType = typesDejaCharges.get(idTypeHoraire);
-                        if (unType == null) {
-                            unType = typeHoraireDAO.getTypeHoraireByID(idTypeHoraire);
-                            typesDejaCharges.put(idTypeHoraire, unType);
-                            horaireDepart = new HoraireDepart(idHoraireDepart, uneLigne, heuredepart, unType);
-                        }
+                        TypeHoraire unType = typeHoraireDAO.getTypeHoraireByID(idTypeHoraire);
+                        horaireDepart = new HoraireDepart(idHoraireDepart, uneLigne, heuredepart, unType);
                     }
 
                     lesHoraires.add(horaireDepart);

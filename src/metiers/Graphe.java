@@ -1,9 +1,8 @@
 package metiers;
 
-import models.DesserteDAO;
-import models.LigneDAO;
-import models.TypeTransportDAO;
+import models.*;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -16,6 +15,8 @@ public class Graphe {
     private int facteurDuree;
     private int facteurDistance;
     private int facteurCoutMonetaire;
+
+    private List<Horaire> listeHoraires = new ArrayList<>();
 
     private Map<Arret, Map<Arret, Map<Ligne,Integer>>> leGraphe;
 
@@ -55,6 +56,17 @@ public class Graphe {
         }
     }
 
+    public Arret getArretSuivant(Arret arretPrecedent, Arret arretActuel, Ligne ligne) {
+        for (Map.Entry<Arret, Map<Ligne, Integer>> arretSuivant : leGraphe.get(arretActuel).entrySet()) {
+            if (arretPrecedent == null && arretSuivant.getValue().get(ligne) != null) {
+                return arretSuivant.getKey();
+            } else if (arretPrecedent != null && arretPrecedent.getId() != arretSuivant.getKey().getId() && arretSuivant.getValue().get(ligne) != null) {
+                return arretSuivant.getKey();
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return leGraphe.entrySet().stream()
@@ -79,6 +91,9 @@ public class Graphe {
         LigneDAO ligneDAO = new LigneDAO();
         try {
             List<Desserte> lesDessertes = desserteDAO.getAllDessertes();
+
+            long startTime = System.nanoTime();
+
             for (Desserte uneDesserte : lesDessertes) {
                 // Gestion du coût monétaire selon le type
                 float prix = uneDesserte.getLigne().getTypeTransport().getCout();
@@ -95,6 +110,14 @@ public class Graphe {
                 this.ajouterCheminMAJSiExistant(uneDesserte.getArretPrecedent(), uneDesserte.getArretSuivant(), uneDesserte.getLigne(), score);
             }
 
+            long endTime = System.nanoTime();
+            System.out.println("Temps de chargement Graphe : " + (endTime - startTime) + " ns");
+
+            boolean horairesChargees = chargerHoraire();
+            if (!horairesChargees) {
+                System.out.println("Graphe chargé sans les horaires...");
+            }
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -102,9 +125,87 @@ public class Graphe {
         }
     }
 
+    private boolean chargerHoraire() throws Exception{
+        LigneDAO ligneDAO = new LigneDAO();
+        ArretDAO arretDAO = new ArretDAO();
+        DesserteDAO desserteDAO = new DesserteDAO();
+        HoraireDepartDAO horaireDepartDAO = new HoraireDepartDAO();
+
+        try {
+            int cpt = 0;
+            List<Ligne> lesLignes = ligneDAO.getAllLigne();
+            desserteDAO.getAllDessertes(); // Mise en cache de toutes les dessertes
+
+            long startTime = System.nanoTime();
+
+            // Parcours des lignes
+            for (Ligne ligne : lesLignes) {
+                for (HoraireDepart horaireDepart : horaireDepartDAO.getAllHoraireDepartByLigne(ligne)) {
+                    // Sens 1
+                    Arret arretPrecedentDepart = null;
+                    Arret arretActuelDepart = arretDAO.getArretByID(ligne.getTerminusDepart().getId());
+                    Arret arretSuivantDepart = this.getArretSuivant(arretPrecedentDepart, arretActuelDepart, ligne);
+
+                    LocalTime horaireSensDepart = null;
+                    while (arretActuelDepart.getId() != ligne.getTerminusArrivee().getId()) {
+                        Desserte desserte = desserteDAO.getDureeDistance(arretActuelDepart.getId(), arretSuivantDepart.getId(), ligne.getId());
+
+                        if (horaireSensDepart != null) {
+                            horaireSensDepart = horaireSensDepart.plusMinutes(desserte.getDuree());
+                        } else {
+                            horaireSensDepart = horaireDepart.getHeureDepart().plusMinutes(desserte.getDuree());
+                        }
+
+                        this.listeHoraires.add(new Horaire(cpt, ligne, horaireSensDepart, arretSuivantDepart, horaireDepart.getTypeHoraire()));
+
+                        arretPrecedentDepart = arretActuelDepart;
+                        arretActuelDepart = arretSuivantDepart;
+                        arretSuivantDepart = this.getArretSuivant(arretPrecedentDepart, arretActuelDepart, ligne);
+                        cpt++;
+                    }
+
+                    // Sens 2
+                    Arret arretPrecedentArrivee = null;
+                    Arret arretActuelArrivee = arretDAO.getArretByID(ligne.getTerminusArrivee().getId());
+                    Arret arretSuivantArrivee= this.getArretSuivant(arretPrecedentArrivee, arretActuelArrivee, ligne);
+
+                    LocalTime horaireSensArrivee = null;
+                    while (arretActuelArrivee.getId() != ligne.getTerminusDepart().getId()) {
+                        Desserte desserte = desserteDAO.getDureeDistance(arretActuelArrivee.getId(), arretSuivantArrivee.getId(), ligne.getId());
+
+                        if (horaireSensArrivee == null) {
+                            horaireSensArrivee = horaireDepart.getHeureDepart().plusMinutes(desserte.getDuree());
+                        } else {
+                            horaireSensArrivee = horaireSensArrivee.plusMinutes(desserte.getDuree());
+                        }
+
+                        this.listeHoraires.add(new Horaire(cpt, ligne, horaireSensArrivee, arretSuivantArrivee, horaireDepart.getTypeHoraire()));
+
+                        arretPrecedentArrivee = arretActuelArrivee;
+                        arretActuelArrivee = arretSuivantArrivee;
+                        arretSuivantArrivee = this.getArretSuivant(arretPrecedentArrivee, arretActuelArrivee, ligne);
+                        cpt++;
+                    }
+                }
+            }
+
+            long endTime = System.nanoTime();
+            System.out.println("Temps de chargement Horaires " + (endTime - startTime) + " ns");
+
+            System.out.println("--- AFFICHAGE HORAIRES ---");
+            System.out.println(listeHoraires);
+            System.out.println("--- FIN AFFICHAGE HORAIRES ---");
+            return true;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // ---------------- Algos de recherche ----------------
 
-    public int distanceVoisin(Arret depart, Arret arrivee, Ligne ligne) {
+    public int scoreVoisin(Arret depart, Arret arrivee, Ligne ligne) {
         if (leGraphe.containsKey(depart)
                 && leGraphe.get(depart).containsKey(arrivee)
                 && leGraphe.get(depart).get(arrivee).containsKey(ligne)) {

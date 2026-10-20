@@ -27,7 +27,7 @@ public class TestLigneDAO {
 
         System.out.println(l);
 
-        boolean ok2 = ligneDAO.deleteLigne(38);
+        boolean ok2 = ligneDAO.deleteLigne(ligneDAO.getLigneByID(38));
         System.out.println("Ligne delete : " + ok2);
     }
 }

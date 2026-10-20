@@ -2,6 +2,7 @@ package models;
 
 import metiers.Arret;
 import metiers.Desserte;
+import metiers.HoraireDepart;
 import metiers.Ligne;
 
 import java.sql.Connection;
@@ -58,11 +59,24 @@ public class DesserteDAO {
     // 2. ID arrêt actuel + ID ligne -> arrêt suivant
     public Arret getArretSuivant(int idArretEnCours, int idLigne) throws Exception {
 
-        String query = "SELECT idArret_est_suivi FROM \"pitt-bdd\".desserte WHERE idArret_est_precede = ? AND idLigne = ?";
+        String query = "SELECT d.idArret_est_suivi " +
+                "FROM \"pitt-bdd\".desserte d " +
+                "WHERE d.idArret_est_precede = ? AND d.idLigne = ? AND (d.idArret_est_suivi NOT IN " +
+                    "(SELECT d2.idArret_est_suivi " +
+                    "FROM \"pitt-bdd\".desserte d2 " +
+                    "WHERE d2.idArret_est_suivi = d.idArret_est_precede AND d2.idligne = ?)" +
+                "OR (d.idArret_est_precede = " +
+                    "(SELECT idarretdepart FROM \"pitt-bdd\".ligne WHERE d.idligne = ?) " +
+                "AND " +
+                "d.idArret_est_precede = " +
+                    "(SELECT idarretarrivee FROM \"pitt-bdd\".ligne WHERE d.idligne = ?)))";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
             ps.setInt(1, idArretEnCours);
             ps.setInt(2, idLigne);
+            ps.setInt(3, idLigne);
+            ps.setInt(4, idLigne);
+            ps.setInt(5, idLigne);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -175,4 +189,25 @@ public class DesserteDAO {
             throw new Exception("Erreur lors de la recherche des arrêts desservis.", e);
         }
     }
+
+    /*
+    public boolean deleteUneDesserte(Desserte uneDesserte) throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".desserte WHERE idarret_est_precede = ? AND idarret_est_suivi = ? AND idligne = ?";
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+            ps.setInt(1, horaire.getId());
+            ps.setInt(2, horaire.getId());
+            ps.setInt(3, uneLigne.getId());
+
+            int desserteModifie = ps.executeUpdate();
+
+            if (desserteModifie > 0) {
+                HoraireDepart.supprimerDuCache(horaire);
+            }
+            return HoraireModifie > 0;
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la suppression de l'horaire ID=" + horaire.getId() + ". Détails:");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de l'horaire avec ID : " + horaire.getId(), e);
+        }
+    }*/
 }

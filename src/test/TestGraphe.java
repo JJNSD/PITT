@@ -120,8 +120,7 @@ public class TestGraphe {
         }
 
         long endTime = System.nanoTime();
-
-        System.out.println((endTime - startTime) + " ns");
+        System.out.println("Temps de chargement complet : " + (endTime - startTime) + " ns");
 
         // ------ Test de trajets ------
         Arret gentric = Arret.getArretEnCache(435);
