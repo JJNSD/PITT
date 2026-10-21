@@ -156,6 +156,8 @@ public class Graphe {
                             horaireSensDepart = horaireDepart.getHeureDepart().plusMinutes(desserte.getDuree());
                         }
 
+                        System.out.println("Ligne " + ligne.getLibelle() + " | Horaire : " + horaireSensDepart);
+
                         this.listeHoraires.add(new Horaire(cpt, ligne, horaireSensDepart, arretSuivantDepart, horaireDepart.getTypeHoraire()));
 
                         arretPrecedentDepart = arretActuelDepart;
