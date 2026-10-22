@@ -114,7 +114,7 @@ public class TestGraphe {
 
         boolean grapheEstCharge = g.chargerGrapheBDD();
         if (grapheEstCharge) {
-            System.out.println(g);
+            //System.out.println(g);
         } else {
             System.out.println("Chargement échoué...");
         }

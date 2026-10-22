@@ -93,6 +93,11 @@ public class Horaire {
         this.heure = heure;
         this.typeHoraire = typeHoraire;
 
-        Horaire.addEnCache(this);
+        //Horaire.addEnCache(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Ligne " + getLigneAffecte() + " Arret " + getArretAffecte() + " | " + getHeure() ;
     }
 }
