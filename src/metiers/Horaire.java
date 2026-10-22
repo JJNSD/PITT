@@ -95,4 +95,9 @@ public class Horaire {
 
         //Horaire.addEnCache(this);
     }
+
+    @Override
+    public String toString() {
+        return "Ligne " + getLigneAffecte() + " Arret " + getArretAffecte() + " | " + getHeure() ;
+    }
 }
