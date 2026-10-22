@@ -190,24 +190,60 @@ public class DesserteDAO {
         }
     }
 
-    /*
+    public boolean deleteDesserteEntre2Arrets(int idArretActuel, int idArretSuivant) throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".desserte WHERE idarret_est_precede = ? AND idarret_est_suivi = ?";
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+            ps.setInt(1, idArretActuel);
+            ps.setInt(2, idArretSuivant);
+
+            int desserteModifiee = ps.executeUpdate();
+
+            for (int i=0; i>desserteModifiee; i++) {
+                Desserte.supprimerDuCache(idArretActuel, idArretSuivant);
+            }
+            return desserteModifiee > 0;
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la suppression d'une desserte ID Arrets=" + idArretActuel + " ; " + idArretSuivant + ". Détails:");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression d'une desserte avec ID Arrets : " + idArretActuel + " ; " + idArretSuivant, e);
+        }
+    }
+
+    public boolean deleteDesserteUneLigne(int idLigne) throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".desserte WHERE idLigne = ?";
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+            ps.setInt(1, idLigne);
+
+            int desserteModifiee = ps.executeUpdate();
+
+            for (int i=0; i>desserteModifiee; i++) {
+                Desserte.supprimerDuCache(idLigne);
+            }
+            return desserteModifiee > 0;
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la suppression d'une desserte ID Ligne=" + idLigne + ". Détails:");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression d'une desserte avec ID Ligne : " + idLigne, e);
+        }
+    }
+
     public boolean deleteUneDesserte(Desserte uneDesserte) throws Exception {
         String query = "DELETE FROM \"pitt-bdd\".desserte WHERE idarret_est_precede = ? AND idarret_est_suivi = ? AND idligne = ?";
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(1, horaire.getId());
-            ps.setInt(2, horaire.getId());
-            ps.setInt(3, uneLigne.getId());
+            ps.setInt(1, uneDesserte.getArretPrecedent().getId());
+            ps.setInt(2, uneDesserte.getArretSuivant().getId());
+            ps.setInt(3, uneDesserte.getLigne().getId());
 
-            int desserteModifie = ps.executeUpdate();
+            int desserteModifiee = ps.executeUpdate();
 
-            if (desserteModifie > 0) {
-                HoraireDepart.supprimerDuCache(horaire);
+            if (desserteModifiee > 0) {
+                Desserte.supprimerDuCache(uneDesserte);
             }
-            return HoraireModifie > 0;
+            return desserteModifiee > 0;
         } catch (Exception e) {
-            System.err.println("ERREUR BDD lors de la suppression de l'horaire ID=" + horaire.getId() + ". Détails:");
+            System.err.println("ERREUR BDD lors de la suppression d'une desserte ID=" + uneDesserte + ". Détails:");
             e.printStackTrace();
-            throw new Exception("Erreur lors de la suppression de l'horaire avec ID : " + horaire.getId(), e);
+            throw new Exception("Erreur lors de la suppression d'une desserte avec ID : " + uneDesserte, e);
         }
-    }*/
+    }
 }
