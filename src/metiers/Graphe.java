@@ -70,18 +70,18 @@ public class Graphe {
     @Override
     public String toString() {
         return leGraphe.entrySet().stream()
-            .map(g -> {
-                String chemin = g.getValue().entrySet().stream()
-                    .map(voisin -> voisin.getKey() + " : {"
-                        + voisin.getValue().entrySet().stream()
-                        .map(l -> "Ligne " + l.getKey() + " : " + l.getValue())
-                        .collect(Collectors.joining(", "))
-                        + "}")
-                    .collect(Collectors.joining(", "));
+                .map(g -> {
+                    String chemin = g.getValue().entrySet().stream()
+                            .map(voisin -> voisin.getKey() + " : {"
+                                    + voisin.getValue().entrySet().stream()
+                                    .map(l -> "Ligne " + l.getKey() + " : " + l.getValue())
+                                    .collect(Collectors.joining(", "))
+                                    + "}")
+                            .collect(Collectors.joining(", "));
 
-                return "{" + g.getKey() + ", {" + (chemin.isEmpty() ? " " : chemin) + "} }";
-            })
-            .collect(Collectors.joining("\n", "", "\n"));
+                    return "{" + g.getKey() + ", {" + (chemin.isEmpty() ? " " : chemin) + "} }";
+                })
+                .collect(Collectors.joining("\n", "", "\n"));
     }
 
     // ---------------- Chargement du graphe depuis la BDD ----------------
@@ -125,9 +125,8 @@ public class Graphe {
         }
     }
 
-    private boolean chargerHoraire() throws Exception{
+    private boolean chargerHoraire() throws Exception {
         LigneDAO ligneDAO = new LigneDAO();
-        ArretDAO arretDAO = new ArretDAO();
         DesserteDAO desserteDAO = new DesserteDAO();
         HoraireDepartDAO horaireDepartDAO = new HoraireDepartDAO();
 
@@ -138,66 +137,179 @@ public class Graphe {
 
             long startTime = System.nanoTime();
 
-            // Parcours des lignes
             for (Ligne ligne : lesLignes) {
-                for (HoraireDepart horaireDepart : horaireDepartDAO.getAllHoraireDepartByLigne(ligne)) {
-                    // Sens 1
-                    Arret arretPrecedentDepart = null;
-                    Arret arretActuelDepart = arretDAO.getArretByID(ligne.getTerminusDepart().getId());
-                    Arret arretSuivantDepart = this.getArretSuivant(arretPrecedentDepart, arretActuelDepart, ligne);
+                List<HoraireDepart> lesDeparts = horaireDepartDAO.getAllHoraireDepartByLigne(ligne);
+                int avant = cpt;
 
-                    LocalTime horaireSensDepart = null;
-                    while (arretActuelDepart.getId() != ligne.getTerminusArrivee().getId() && arretSuivantDepart != null) {
-                        Desserte desserte = desserteDAO.getDureeDistance(arretActuelDepart.getId(), arretSuivantDepart.getId(), ligne.getId());
+                Arret[][] sens = {
+                        {ligne.getTerminusDepart(), ligne.getTerminusArrivee()},
+                        {ligne.getTerminusArrivee(), ligne.getTerminusDepart()}
+                };
 
-                        if (horaireSensDepart != null) {
-                            horaireSensDepart = horaireSensDepart.plusMinutes(desserte.getDuree());
-                        } else {
-                            horaireSensDepart = horaireDepart.getHeureDepart().plusMinutes(desserte.getDuree());
+                for (Arret[] parcours : sens) {
+                    Arret debut = parcours[0];
+                    Arret fin = parcours[1];
+
+                    LinkedList<Arret> chemin = new LinkedList<>();
+
+                    // --- CAS 1 : Ligne circulaire (ex: 5a / 5b, AquaVita -> AquaVita) ---
+                    if (debut.getId() == fin.getId()) {
+                        Arret courant = debut;
+                        Arret precedentArret = null;
+                        chemin.add(courant);
+
+                        Map<Integer, Integer> nbVisites = new HashMap<>();
+                        nbVisites.put(debut.getId(), 1);
+
+                        while (true) {
+                            Map<Arret, Map<Ligne, Integer>> voisins = leGraphe.get(courant);
+                            if (voisins == null) break;
+
+                            List<Arret> candidatsValides = new ArrayList<>();
+
+                            for (Map.Entry<Arret, Map<Ligne, Integer>> v : voisins.entrySet()) {
+                                if (v.getValue().containsKey(ligne)) {
+                                    Arret candidate = v.getKey();
+                                    int idC = candidate.getId();
+
+                                    // On évite de retourner immédiatement sur l'arrêt précédent (sauf rebroussement validé)
+                                    if (precedentArret != null && candidate.getId() == precedentArret.getId()) {
+                                        // Autorisé uniquement si c'est un rebroussement en fin d'antenne (ex: Neruda 202 ou Auriol 78)
+                                        if (courant.getId() != 202 && courant.getId() != 78) {
+                                            continue;
+                                        }
+                                    }
+
+                                    int maxVisitesAutorisees = 1;
+                                    // Arrêts autorisés à 2 visites (rebroussement)
+                                    if (idC == 201 || idC == 78 || idC == 202) {
+                                        maxVisitesAutorisees = 2;
+                                    }
+
+                                    int visitesActuelles = nbVisites.getOrDefault(idC, 0);
+
+                                    // Condition de bouclage vers le terminus initial si le chemin est assez long
+                                    if (idC == debut.getId() && chemin.size() > 5) {
+                                        candidatsValides.add(candidate);
+                                        continue;
+                                    }
+
+                                    if (visitesActuelles < maxVisitesAutorisees) {
+                                        candidatsValides.add(candidate);
+                                    }
+                                }
+                            }
+
+                            if (candidatsValides.isEmpty()) {
+                                break;
+                            }
+
+                            // Tri pour un comportement déterministe (priorité aux arrêts jamais visités ou aux antennes)
+                            candidatsValides.sort((a, b) -> {
+                                int vA = nbVisites.getOrDefault(a.getId(), 0);
+                                int vB = nbVisites.getOrDefault(b.getId(), 0);
+                                if (vA != vB) {
+                                    return Integer.compare(vA, vB);
+                                }
+                                // Si même nombre de visites, on priorise l'antenne spécifique d'Orgemont (202)
+                                if (a.getId() == 202) return -1;
+                                if (b.getId() == 202) return 1;
+                                return Integer.compare(a.getId(), b.getId());
+                            });
+
+                            Arret suivant = candidatsValides.get(0);
+
+                            // Si on boucle sur le début et qu'on a fait le tour
+                            if (suivant.getId() == debut.getId() && chemin.size() > 5) {
+                                chemin.add(suivant);
+                                break;
+                            }
+
+                            precedentArret = courant;
+                            courant = suivant;
+                            chemin.add(courant);
+                            nbVisites.put(courant.getId(), nbVisites.getOrDefault(courant.getId(), 0) + 1);
                         }
 
-                        this.listeHoraires.add(new Horaire(cpt, ligne, horaireSensDepart, arretSuivantDepart, horaireDepart.getTypeHoraire()));
+                        if (chemin.size() <= 1) {
+                            System.out.println("Ligne " + ligne + " circulaire : aucun chemin valide trouvé");
+                            break;
+                        }
+                    } else {
+                        Map<Arret, Arret> precedent = new HashMap<>();
+                        Queue<Arret> file = new ArrayDeque<>();
+                        Arret finTrouvee = null;
+                        precedent.put(debut, null);
+                        file.add(debut);
 
-                        arretPrecedentDepart = arretActuelDepart;
-                        arretActuelDepart = arretSuivantDepart;
-                        arretSuivantDepart = this.getArretSuivant(arretPrecedentDepart, arretActuelDepart, ligne);
-                        cpt++;
+                        while (!file.isEmpty() && finTrouvee == null) {
+                            Arret courant = file.poll();
+                            Map<Arret, Map<Ligne, Integer>> voisins = leGraphe.get(courant);
+                            if (voisins == null) {
+                                continue;
+                            }
+                            for (Map.Entry<Arret, Map<Ligne, Integer>> v : voisins.entrySet()) {
+                                Arret voisin = v.getKey();
+                                if (!v.getValue().containsKey(ligne) || precedent.containsKey(voisin)) {
+                                    continue;
+                                }
+                                precedent.put(voisin, courant);
+                                if (voisin.getId() == fin.getId()) {
+                                    finTrouvee = voisin;
+                                    break;
+                                }
+                                file.add(voisin);
+                            }
+                        }
+
+                        if (finTrouvee == null) {
+                            System.out.println("Ligne " + ligne + " : aucun trajet " + debut + " -> " + fin + " dans le graphe");
+                            continue;
+                        }
+
+                        // Reconstruction du chemin
+                        for (Arret a = finTrouvee; a != null; a = precedent.get(a)) {
+                            chemin.addFirst(a);
+                        }
                     }
 
-                    // Sens 2
-                    Arret arretPrecedentArrivee = null;
-                    Arret arretActuelArrivee = arretDAO.getArretByID(ligne.getTerminusArrivee().getId());
-                    Arret arretSuivantArrivee= this.getArretSuivant(arretPrecedentArrivee, arretActuelArrivee, ligne);
+                    System.out.println("Chemin trouvé pour ligne " + ligne + " : " + chemin);
 
-                    LocalTime horaireSensArrivee = null;
-                    while (arretActuelArrivee.getId() != ligne.getTerminusDepart().getId() && arretSuivantArrivee != null) {
-                        Desserte desserte = desserteDAO.getDureeDistance(arretActuelArrivee.getId(), arretSuivantArrivee.getId(), ligne.getId());
+                    // --- Calcul des décalages et création des horaires ---
+                    List<Arret> intermediaires = new ArrayList<>();
+                    List<Integer> decalages = new ArrayList<>();
+                    int decalage = 0;
 
-                        if (horaireSensArrivee == null) {
-                            horaireSensArrivee = horaireDepart.getHeureDepart().plusMinutes(desserte.getDuree());
-                        } else {
-                            horaireSensArrivee = horaireSensArrivee.plusMinutes(desserte.getDuree());
+                    // Pour les intermédiaires, on ne prend pas le dernier arrêt (déjà terminus)
+                    for (int i = 1; i < chemin.size() - 1; i++) {
+                        Desserte desserte = desserteDAO.getDureeDistance(chemin.get(i - 1).getId(), chemin.get(i).getId(), ligne.getId());
+                        decalage += (desserte != null) ? desserte.getDuree() : 0;
+                        intermediaires.add(chemin.get(i));
+                        decalages.add(decalage);
+                    }
+
+                    // Génération des horaires par passage
+                    for (HoraireDepart horaireDepart : lesDeparts) {
+                        for (int i = 0; i < intermediaires.size(); i++) {
+                            LocalTime heure = horaireDepart.getHeureDepart().plusMinutes(decalages.get(i));
+                            this.listeHoraires.add(new Horaire(cpt, ligne, heure, intermediaires.get(i), horaireDepart.getTypeHoraire()));
+                            cpt++;
                         }
+                    }
 
-                        this.listeHoraires.add(new Horaire(cpt, ligne, horaireSensArrivee, arretSuivantArrivee, horaireDepart.getTypeHoraire()));
-
-                        arretPrecedentArrivee = arretActuelArrivee;
-                        arretActuelArrivee = arretSuivantArrivee;
-                        arretSuivantArrivee = this.getArretSuivant(arretPrecedentArrivee, arretActuelArrivee, ligne);
-                        cpt++;
+                    // Pour une ligne circulaire, un seul passage de boucle suffit
+                    if (debut.getId() == fin.getId()) {
+                        break;
                     }
                 }
+                System.out.println("Ligne " + ligne + " : " + (cpt - avant) + " horaires");
             }
 
             long endTime = System.nanoTime();
             System.out.println("Temps de chargement Horaires " + (endTime - startTime) + " ns");
-
-            System.out.println("--- AFFICHAGE HORAIRES ---");
-            System.out.println(listeHoraires);
-            System.out.println("--- FIN AFFICHAGE HORAIRES ---");
+            System.out.println(listeHoraires.size() + " horaires chargés");
             return true;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
