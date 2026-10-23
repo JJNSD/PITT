@@ -27,6 +27,10 @@ public class Perturbation {
         lesPerturbationsEnCache.removeIf(p -> p.getId() == perturbation.getId());
     }
 
+    public static void resetCache() {
+        lesPerturbationsEnCache = new ArrayList<>();
+    }
+
     // ---------------- Objet ----------------
 
     private int id;

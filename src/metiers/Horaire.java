@@ -39,6 +39,10 @@ public class Horaire {
         lesHoraires.add(horaire);
     }
 
+    public static void resetCache() {
+        lesHoraires = new ArrayList<>();
+    }
+
     // ---------------- Objet ----------------
     private int id;
     private Ligne ligneAffecte;
