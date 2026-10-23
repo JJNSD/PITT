@@ -1,5 +1,6 @@
 package test;
 
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -120,26 +121,28 @@ public class TestGraphe {
         }
 
         long endTime = System.nanoTime();
-        System.out.println("Temps de chargement complet : " + (endTime - startTime) + " ns");
+
+        System.out.println("Temps de chargement total : " + (endTime - startTime) + " ns");
 
         // ------ Test de trajets ------
-        Arret gentric = Arret.getArretEnCache(435);
+        Arret gentric = Arret.getArretEnCache(76);
         Arret beaussier = Arret.getArretEnCache(40);
 
-        // test bfs
-        List<List<Object>> chemin = g.cheminBfs(gentric, beaussier);
-        List<List<Object>> chemin2 = g.cheminBfs(beaussier, gentric);
-        System.out.println("Chemin BFS Gentric -> Beaussier : " + chemin + "\n");
-        System.out.println("Chemin BFS Beaussier -> Gentric : " + chemin2 + "\n");
+        // Exemple d'heure fixe pour tester (08:00) ou null pour prendre l'heure actuelle
+        LocalTime heureTest = LocalTime.of(12, 0);
 
-        // test djikstra
-        System.out.println("Dijkstra Gentric -> Beaussier : " + g.cheminDjikstra(gentric, beaussier, null) + "\n");
-        System.out.println("Dijkstra Beaussier -> Gentric : " + g.cheminDjikstra(beaussier, gentric, null) + "\n");
+        // test bfs (paramètre heure : null = heure actuelle, ou heureTest)
+        List<List<Object>> chemin = g.cheminBfs(gentric, beaussier, null);
+        List<List<Object>> chemin2 = g.cheminBfs(beaussier, gentric, heureTest);
+        System.out.println("Chemin BFS Gentric -> Beaussier (Heure actuelle) : " + chemin + "\n");
+        System.out.println("Chemin BFS Beaussier -> Gentric (08:00) : " + chemin2 + "\n");
 
-        // test a*
-        System.out.println("A* Gentric -> Beaussier : " + g.cheminAStar(gentric, beaussier, null) + "\n");
-        System.out.println("A* Beaussier -> Gentric : " + g.cheminAStar(beaussier, gentric, null) + "\n");
+        // test djikstra (paramètre heure ajouté en fin de signature)
+        System.out.println("Dijkstra Gentric -> Beaussier (Heure actuelle) : " + g.cheminDjikstra(gentric, beaussier, null, null) + "\n");
+        System.out.println("Dijkstra Beaussier -> Gentric (08:00) : " + g.cheminDjikstra(beaussier, gentric, null, heureTest) + "\n");
 
-        // TODO : Améliorer la recherche de chemin pour que le score soit plus élevé par correspondance, trop de correspondances par trajet
+        // test a* (paramètre heure ajouté en fin de signature)
+        System.out.println("A* Gentric -> Beaussier (Heure actuelle) : " + g.cheminAStar(gentric, beaussier, null, null) + "\n");
+        System.out.println("A* Beaussier -> Gentric (08:00) : " + g.cheminAStar(beaussier, gentric, null, heureTest) + "\n");
     }
 }

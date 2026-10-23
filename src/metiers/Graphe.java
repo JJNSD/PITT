@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 
 public class Graphe {
-    private final int coutCorrespondance = 1;
+    private final int coutCorrespondance = 1000;
 
     // Facteurs pour calculer le score => 0 à 10
     private int facteurDuree;
@@ -315,6 +315,43 @@ public class Graphe {
         }
     }
 
+    // ---------------- Gestion des horaires et durées via BDD ----------------
+
+    private LocalTime getProchainHoraire(Arret arret, Ligne ligne, LocalTime heureMin) {
+        LocalTime meilleur = null;
+        for (Horaire h : listeHoraires) {
+            if (h.getArretAffecte().getId() == arret.getId() && h.getLigneAffecte().getId() == ligne.getId()) {
+                LocalTime t = h.getHeure();
+                if (t != null && !t.isBefore(heureMin)) {
+                    if (meilleur == null || t.isBefore(meilleur)) {
+                        meilleur = t;
+                    }
+                }
+            }
+        }
+        return (meilleur != null) ? meilleur : heureMin;
+    }
+
+    private int getTempsAttente(Arret arret, Ligne ligne, LocalTime heureCourante) {
+        LocalTime prochain = getProchainHoraire(arret, ligne, heureCourante);
+        if (prochain.isBefore(heureCourante)) return 0;
+        return (int) java.time.Duration.between(heureCourante, prochain).toMinutes();
+    }
+
+    // Requête directe en BDD pour récupérer la vraie durée en minutes
+    private int getDureeReelle(Arret depart, Arret arrivee, Ligne ligne) {
+        try {
+            DesserteDAO desserteDAO = new DesserteDAO();
+            Desserte desserte = desserteDAO.getDureeDistance(depart.getId(), arrivee.getId(), ligne.getId());
+            if (desserte != null) {
+                return desserte.getDuree();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 1; // Valeur par défaut si non trouvée
+    }
+
     // ---------------- Algos de recherche ----------------
 
     public int scoreVoisin(Arret depart, Arret arrivee, Ligne ligne) {
@@ -326,7 +363,7 @@ public class Graphe {
         return -1;
     }
 
-    public List<List<Object>> cheminBfs(Arret depart, Arret arrivee) {
+    public List<List<Object>> cheminBfs(Arret depart, Arret arrivee, LocalTime heure) {
         if (depart == null || arrivee == null
                 || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
             return null;
@@ -379,14 +416,12 @@ public class Graphe {
         return null;
     }
 
-    /** Dijkstra : heuristique nulle. */
-    public List<List<Object>> cheminDjikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
-        return cheminPlusCourt(depart, arrivee, lesLignes, 0);
+    public List<List<Object>> cheminDjikstra(Arret depart, Arret arrivee, List<Ligne> lesLignes, LocalTime heure) {
+        return cheminPlusCourt(depart, arrivee, lesLignes, 0, heure);
     }
 
-    /** A* avec un coef calcule automatiquement (admissible et coherent). */
-    public List<List<Object>> cheminAStar(Arret depart, Arret arrivee, List<Ligne> lesLignes) {
-        return cheminPlusCourt(depart, arrivee, lesLignes, coefficientAdmissible(lesLignes));
+    public List<List<Object>> cheminAStar(Arret depart, Arret arrivee, List<Ligne> lesLignes, LocalTime heure) {
+        return cheminPlusCourt(depart, arrivee, lesLignes, coefficientAdmissible(lesLignes), heure);
     }
 
     /**
@@ -422,66 +457,98 @@ public class Graphe {
      *
      * @return liste d'etapes [arret, ligne] du depart a l'arrivee, ou null
      */
-    private List<List<Object>> cheminPlusCourt(Arret depart, Arret arrivee, List<Ligne> lesLignes, double coef) {
+    private List<List<Object>> cheminPlusCourt(Arret depart, Arret arrivee, List<Ligne> lesLignes, double coef, LocalTime heure) {
         if (depart == null || arrivee == null
                 || !leGraphe.containsKey(depart) || !leGraphe.containsKey(arrivee)) {
             return null;
         }
+        LocalTime heureDepart = (heure != null) ? heure : LocalTime.now();
         LocalDateTime maintenant = LocalDateTime.now();
 
         Map<List<Object>, Integer> gScore = new HashMap<>();
         Map<List<Object>, Double> fScore = new HashMap<>();
         Map<List<Object>, List<Object>> predecesseurs = new HashMap<>();
+        Map<List<Object>, LocalTime> tempsArrivee = new HashMap<>();
 
         PriorityQueue<List<Object>> file = new PriorityQueue<>(
                 Comparator.comparingDouble((List<Object> e) -> fScore.getOrDefault(e, Double.MAX_VALUE)));
 
-        List<Object> etapeDepart = Arrays.asList(depart, null); // pas de ligne au depart
+        List<Object> etapeDepart = Arrays.asList(depart, null);
         gScore.put(etapeDepart, 0);
         fScore.put(etapeDepart, heuristique(depart, arrivee, coef));
+        tempsArrivee.put(etapeDepart, heureDepart);
         file.add(etapeDepart);
 
         while (!file.isEmpty()) {
             List<Object> courant = file.poll();
             Arret arretCourant = (Arret) courant.get(0);
             Ligne ligneCourante = (Ligne) courant.get(1);
+            LocalTime heureActuelle = tempsArrivee.get(courant);
 
             if (arretCourant.equals(arrivee)) {
+                LocalTime heureArriveeFinale = heureActuelle;
+                long dureeTotaleMinutes = java.time.Duration.between(heureDepart, heureArriveeFinale).toMinutes();
+
+                System.out.println("====== RÉSUMÉ DU TRAJET ======");
+                System.out.println("Départ : " + heureDepart + " | Arrivée : " + heureArriveeFinale);
+                System.out.println("Durée totale du trajet : " + dureeTotaleMinutes + " minutes");
+                System.out.println("==============================");
+
                 LinkedList<List<Object>> chemin = new LinkedList<>();
                 List<Object> e = courant;
-                chemin.addFirst(e);
+                // On ajoute l'arrêt, la ligne et son heure de passage
+                chemin.addFirst(Arrays.asList(e.get(0), e.get(1), heureActuelle));
+
                 while (predecesseurs.get(e) != null) {
                     e = predecesseurs.get(e);
-                    chemin.addFirst(e);
+                    LocalTime tempsEtape = tempsArrivee.get(e);
+                    chemin.addFirst(Arrays.asList(e.get(0), e.get(1), tempsEtape));
                 }
                 return chemin;
             }
 
             for (Map.Entry<Arret, Map<Ligne, Integer>> v : leGraphe.get(arretCourant).entrySet()) {
                 Arret voisin = v.getKey();
-                if (voisin.estPerturbe(maintenant)) {
-                    continue;
-                }
+                if (voisin.estPerturbe(maintenant)) continue;
+
                 for (Map.Entry<Ligne, Integer> c : v.getValue().entrySet()) {
                     Ligne ligne = c.getKey();
                     boolean autorisee = lesLignes == null || lesLignes.isEmpty() || lesLignes.contains(ligne);
-                    if (!autorisee || c.getValue() < 0) {
-                        continue;
+                    if (!autorisee || c.getValue() < 0) continue;
+
+                    int correspondance = 0;
+                    int attente = 0;
+                    LocalTime heureDepartLigne;
+
+                    if (ligneCourante == null || !ligneCourante.equals(ligne)) {
+                        if (ligneCourante != null) {
+                            correspondance = coutCorrespondance;
+                        }
+                        attente = getTempsAttente(arretCourant, ligne, heureActuelle);
+                        heureDepartLigne = getProchainHoraire(arretCourant, ligne, heureActuelle);
+                        if (heureDepartLigne == null) {
+                            heureDepartLigne = heureActuelle;
+                        }
+                    } else {
+                        attente = 0;
+                        heureDepartLigne = heureActuelle;
                     }
 
-                    int correspondance = (ligneCourante != null && !ligneCourante.equals(ligne))
-                            ? coutCorrespondance : 0;
-                    long nouveauCout = (long) gScore.get(courant) + c.getValue() + correspondance;
+                    long nouveauCout = (long) gScore.get(courant) + c.getValue() + correspondance + attente;
                     if (nouveauCout > Integer.MAX_VALUE) {
                         continue;
                     }
 
+                    int vraieDuree = getDureeReelle(arretCourant, voisin, ligne);
+                    LocalTime heureVoisin = heureDepartLigne.plusMinutes(vraieDuree);
+
                     List<Object> suivant = Arrays.asList(voisin, ligne);
                     if (nouveauCout < gScore.getOrDefault(suivant, Integer.MAX_VALUE)) {
-                        file.remove(suivant); // AVANT de modifier fScore
+                        file.remove(suivant);
                         gScore.put(suivant, (int) nouveauCout);
                         fScore.put(suivant, nouveauCout + heuristique(voisin, arrivee, coef));
                         predecesseurs.put(suivant, courant);
+                        tempsArrivee.put(suivant, heureVoisin);
                         file.add(suivant);
                     }
                 }
@@ -490,20 +557,18 @@ public class Graphe {
         return null;
     }
 
-    // Distance a vol d'oiseau (Haversine) en km
     private double haversine(Arret a, Arret b) {
         double R = 6372.8;
         double dLat = Math.toRadians(b.getLattitude() - a.getLattitude());
         double dLon = Math.toRadians(b.getLongitude() - a.getLongitude());
         double h = Math.pow(Math.sin(dLat / 2), 2)
-                + Math.pow(Math.sin(dLon / 2), 2)
-                * Math.cos(Math.toRadians(a.getLattitude()))
-                * Math.cos(Math.toRadians(b.getLattitude()));
+                + Math.cos(Math.toRadians(a.getLattitude()))
+                * Math.cos(Math.toRadians(b.getLattitude()))
+                * Math.pow(Math.sin(dLon / 2), 2);
         return 2 * R * Math.asin(Math.sqrt(h));
     }
 
     private double heuristique(Arret depart, Arret arrivee, double coef) {
         return coef == 0 ? 0 : haversine(depart, arrivee) * coef;
     }
-
 }
