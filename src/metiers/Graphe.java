@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 
 public class Graphe {
+    private static Graphe grapheObj;
+
     private final int coutCorrespondance = 1000;
 
     // Facteurs pour calculer le score => 0 à 10
@@ -20,11 +22,19 @@ public class Graphe {
 
     private Map<Arret, Map<Arret, Map<Ligne,Integer>>> leGraphe;
 
-    public Graphe(int facteurDuree, int facteurDistance, int facteurCoutMonetaire) {
+    private Graphe(int facteurDuree, int facteurDistance, int facteurCoutMonetaire) {
         leGraphe = new HashMap<>();
         this.facteurDuree = facteurDuree;
         this.facteurDistance = facteurDistance;
         this.facteurCoutMonetaire = facteurCoutMonetaire;
+    }
+
+    public static Graphe getGraphe(int facteurDuree, int facteurDistance, int facteurCoutMonetaire) {
+        if (grapheObj == null) {
+            grapheObj = new Graphe(facteurDuree, facteurDistance, facteurCoutMonetaire);
+        }
+
+        return grapheObj;
     }
 
     public void ajouterSommet(Arret sommet) {
