@@ -45,6 +45,10 @@ public class Desserte {
         lesDessertesEnCache.removeIf(d -> d.getLigne().getId() == idLigne);
     }
 
+    public static void resetCache() {
+        lesDessertesEnCache = new ArrayList<>();
+    }
+
     // ---------------- Objet ----------------
 
     private Arret arretPrecedent;

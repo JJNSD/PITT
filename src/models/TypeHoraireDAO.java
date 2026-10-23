@@ -121,4 +121,21 @@ public class TypeHoraireDAO {
             throw new Exception("Erreur lors de la suppression du type d'horaire avec ID : " + typeHoraire.getId(), e);
         }
     }
+
+    public boolean resetTypeHoraire() throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".typehoraire";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            int typesModifies = ps.executeUpdate();
+
+            Arret.resetCache();
+
+            return typesModifies > 0;
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la suppression de la table TypeHoraire, Détails : ");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de la table TypeHoraire " , e);
+        }
+    }
 }

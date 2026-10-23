@@ -8,6 +8,7 @@ import metiers.Ligne;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -244,6 +245,23 @@ public class DesserteDAO {
             System.err.println("ERREUR BDD lors de la suppression d'une desserte ID=" + uneDesserte + ". Détails:");
             e.printStackTrace();
             throw new Exception("Erreur lors de la suppression d'une desserte avec ID : " + uneDesserte, e);
+        }
+    }
+
+    public boolean resetDesserte() throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".desserte";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            int dessertesModifies = ps.executeUpdate();
+
+            Desserte.resetCache();
+
+            return dessertesModifies > 0;
+        } catch (SQLException e) {
+            System.err.println("ERREUR BDD lors de la suppression de la table Desserte, Détails : ");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de la table Desserte" , e);
         }
     }
 }

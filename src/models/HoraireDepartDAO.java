@@ -5,10 +5,7 @@ import metiers.HoraireDepart;
 import metiers.Ligne;
 import metiers.TypeHoraire;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Time;
+import java.sql.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,6 +137,23 @@ public class HoraireDepartDAO {
             System.err.println("ERREUR BDD lors de la suppression de l'horaire ID=" + horaire.getId() + ". Détails:");
             e.printStackTrace();
             throw new Exception("Erreur lors de la suppression de l'horaire avec ID : " + horaire.getId(), e);
+        }
+    }
+
+    public boolean resetHoraireDepart() throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".horairedepart";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            int horairesDepartModifies = ps.executeUpdate();
+
+            HoraireDepart.resetCache();
+
+            return horairesDepartModifies > 0;
+        } catch (SQLException e) {
+            System.err.println("ERREUR BDD lors de la suppression de la table HoraireDepart, Détails : ");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de la table HoraireDepart" , e);
         }
     }
 }

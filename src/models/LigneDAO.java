@@ -142,4 +142,21 @@ public class LigneDAO {
             throw new Exception("Erreur lors de la suppression de la ligne avec ID : " + ligne.getId(), e);
         }
     }
+
+    public boolean resetLigne() throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".ligne";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            int lignesModifies = ps.executeUpdate();
+
+            Ligne.resetCache();
+
+            return lignesModifies > 0;
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la suppression de la table Ligne, Détails : ");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de la table Ligne" , e);
+        }
+    }
 }

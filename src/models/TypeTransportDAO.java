@@ -123,4 +123,21 @@ public class TypeTransportDAO {
             throw new Exception("Erreur lors de la suppression du type de transport avec ID : " + typeTransport.getId(), e);
         }
     }
+
+    public boolean resetTypeTransport() throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".typetransport";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            int typeTransportModifies = ps.executeUpdate();
+
+            TypeTransport.resetCache();
+
+            return typeTransportModifies > 0;
+        } catch (Exception e) {
+            System.err.println("ERREUR BDD lors de la suppression de la table TypeTransport, Détails : ");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de la table TypeTransport" , e);
+        }
+    }
 }
