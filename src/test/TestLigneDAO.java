@@ -1,34 +1,54 @@
 package test;
 
-import metiers.*;
-import models.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import metiers.Ligne;
+import models.LigneDAO;
 
 public class TestLigneDAO {
-    public static void main(String[] args) throws Exception {
-        LigneDAO ligneDAO = new LigneDAO();
-        ArretDAO arretDAO = new ArretDAO();
-        TypeTransportDAO transportDAO = new TypeTransportDAO();
-        Ligne l1 = ligneDAO.getLigneByID(1);
-        Arret a1 = arretDAO.getArretByID(1);
-        Arret a2 = arretDAO.getArretByID(18);
-        TypeTransport t1 = transportDAO.getTypeTransportByID(1);
 
-        System.out.println(l1);
+    private LigneDAO ligneDAO;
 
-        System.out.println(ligneDAO.getAllLigne());
-        Ligne D = new Ligne(0,"D", "000000", a1, a2, t1);
+    @BeforeEach
+    public void setUp() {
+        ligneDAO = new LigneDAO();
+    }
 
-        boolean ok = ligneDAO.insertLigne(D);
-        System.out.println("Insertion réussie : " + ok);
+    @Test
+    public void testGetAllLigne() throws Exception {
+        List<Ligne> lignes = ligneDAO.getAllLigne();
 
-        Ligne l = ligneDAO.getLigneByID(38);
-        l.setLibelle("E"); // si tu as un setter
-        ligneDAO.updateLigne(l);
+        assertNotNull(lignes, "La liste des lignes ne doit pas être null");
 
-        System.out.println(l);
+        for (Ligne ligne : lignes) {
+            assertNotNull(ligne, "Une ligne ne doit pas être null");
+            assertTrue(ligne.getId() > 0, "L'identifiant doit être positif");
+            assertNotNull(ligne.getLibelle(), "Le libellé ne doit pas être null");
 
-        boolean ok2 = ligneDAO.deleteLigne(ligneDAO.getLigneByID(38));
-        System.out.println("Ligne delete : " + ok2);
+            System.out.println(
+                    "ID : " + ligne.getId()
+                            + " | Libellé : " + ligne.getLibelle()
+            );
+        }
+    }
+
+    @Test
+    public void testGetLigneByID() throws Exception {
+        List<Ligne> lignes = ligneDAO.getAllLigne();
+
+        assertFalse(lignes.isEmpty(),
+                "La base de données doit contenir au moins une ligne");
+
+        Ligne ligneAttendue = lignes.get(0);
+        Ligne ligneTrouvee = ligneDAO.getLigneByID(ligneAttendue.getId());
+
+        assertNotNull(ligneTrouvee, "La ligne doit être retrouvée");
+        assertEquals(ligneAttendue.getId(), ligneTrouvee.getId());
+        assertEquals(ligneAttendue.getLibelle(), ligneTrouvee.getLibelle());
     }
 }
-
