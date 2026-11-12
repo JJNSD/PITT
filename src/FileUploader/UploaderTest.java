@@ -5,11 +5,11 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Map;
 
-public final class NaimeEstNwarr {
+public final class UploaderTest {
     private static final String SCHEMA_TEST = "pitt_bdd_test";
     private static final Path DOSSIER_CSV = Path.of("src/FileUploader/file/test_reseau");
 
-    private NaimeEstNwarr() {
+    private UploaderTest() {
     }
 
     public static void main(String[] args) throws IOException, SQLException {

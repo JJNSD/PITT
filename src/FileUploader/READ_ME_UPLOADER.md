@@ -38,9 +38,9 @@ idarret;nomarret;lattitude;longitude
 
 ## Comment lancer le runner
 
-Ouvre `NaimeEstNwarr.java`, lance le ou je te niggarifie ! Le runner utilise les fichiers de `file/test_reseau` et le schéma `pitt_bdd_test`(tu peux le changer au besoin).
+Ouvre `UploaderTest.java`, lances-le ! Le runner utilise les fichiers de `file/test_reseau` et le schéma `pitt_bdd_test`(tu peux le changer au besoin).
 
-Je l'ai indiquer dans le fichier '[Uploadeur de nègre.com](Uploader.java)' comme ci-dessous :
+Je l'ai indiquer dans le fichier '[Uploadeur](Uploader.java)' comme ci-dessous :
 
 ```java
 Uploader uploader = new Uploader("pitt_bdd_test");
@@ -51,7 +51,7 @@ Uploader.ImportResult resultat = uploader.importer(
 System.out.println(resultat.getCompteurs());
 ```
 
-## Si ça beug 
+## Si ça bug 
 
 Déjà Je dois dire que le skill issue est galactique chef !!  
 

@@ -1,5 +1,6 @@
 package InterfaceTerminale;
 
+import FileUploader.Uploader;
 import metiers.Arret;
 import metiers.Graphe;
 import metiers.Ligne;
@@ -8,12 +9,19 @@ import models.LigneDAO;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class Main {
+
+    private static final String SCHEMA = "pitt_bdd";
+    private static Path DOSSIER_CSV = null;
+    private static Uploader UPLOADER;
+
     static void main() throws Exception {
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 
@@ -34,12 +42,31 @@ public class Main {
         List<Ligne> lesLignes = ligneDAO.getAllLigne();
 
         while(true) {
-            System.out.println("Ecrivez une commande : ('help' pour le message d'aide) : ");
+            System.out.println("Ecrivez une commande ('help' pour le message d'aide) : ");
             String command = r.readLine();
 
             switch (command) {
                 case "help":
                     printHelp();
+                    break;
+
+                case "chargerBddCSV":
+                    try {
+                        System.out.println("Ecrivez le chemin du dossier : ");
+                        String path = r.readLine();
+
+                        DOSSIER_CSV = Path.of(path);
+
+                         UPLOADER = new Uploader(SCHEMA);
+                        Uploader.ImportResult resultat = UPLOADER.importer(DOSSIER_CSV, Uploader.ImportMode.REPLACE_NETWORK);
+
+                        System.out.println("Succès : Le dossier a bien été chargé.\nAffichage du chargement : ");
+                        for (Map.Entry<String, Integer> entree : resultat.getCompteurs().entrySet()) {
+                            System.out.println("- " + entree.getKey() + " : " + entree.getValue());
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Erreur : Impossible de charger le dossier.");
+                    }
                     break;
 
                 case "setFacteurDuree":
@@ -222,14 +249,19 @@ public class Main {
                     }
                     break;
 
+                case "kill":
+                    throw new Exception("Fin du programme");
+
                 default:
                     printHelp();
+                    break;
             }
         }
     }
 
     private static void printHelp() {
         System.out.println("help : Affiche ce message.\n" +
+            "chargerBddCSV : charge la base de données à partir de CSV. La racine du projet est 'PITT/', si le dossier n'est pas dans le projet, précisez la racine au début '/'.\n" +
             "setFacteurDuree : définie l'importance de la durée lors du calcul du score.\n" +
             "setFacteurDistance : définie l'importance de la distance lors du calcul du score.\n" +
             "setFacteurCoutMonetaire : définie l'importance du coût monétaire lors du calcul du score.\n" +
@@ -239,6 +271,7 @@ public class Main {
             "setHoraireRecherche : définie l'horaire à partir duquel faire la recherche (facultatif).\n" +
             "doDjikstra : Lance la recherche avec Djikstra.\n" +
             "doA* : Lance la recherche avec A*.\n" +
-            "doBFS : Lance la recherche avec BFS.\n");
+            "doBFS : Lance la recherche avec BFS.\n" +
+            "kill : Arrête le programme.\n");
     }
 }
