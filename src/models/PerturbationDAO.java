@@ -224,4 +224,21 @@ public class PerturbationDAO {
             return false;
         }
     }
+
+    public boolean resetPerturbation() throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".arret";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            int arretsModifies = ps.executeUpdate();
+
+            Perturbation.resetCache();
+
+            return arretsModifies > 0;
+        } catch (SQLException e) {
+            System.err.println("ERREUR BDD lors de la suppression de la table Perturbation, Détails : ");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de la table Perturbation" , e);
+        }
+    }
 }

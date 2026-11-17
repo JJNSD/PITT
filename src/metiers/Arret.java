@@ -27,6 +27,10 @@ public class Arret {
         lesArretsEnCache.removeIf(a -> a.getId() == arret.getId());
     }
 
+    public static void resetCache() {
+        lesArretsEnCache = new ArrayList<>();
+    }
+
     // ---------------- Objet ----------------
 
     private int id;

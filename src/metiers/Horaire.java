@@ -39,6 +39,10 @@ public class Horaire {
         lesHoraires.add(horaire);
     }
 
+    public static void resetCache() {
+        lesHoraires = new ArrayList<>();
+    }
+
     // ---------------- Objet ----------------
     private int id;
     private Ligne ligneAffecte;
@@ -93,6 +97,11 @@ public class Horaire {
         this.heure = heure;
         this.typeHoraire = typeHoraire;
 
-        Horaire.addEnCache(this);
+        //Horaire.addEnCache(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Ligne " + getLigneAffecte() + " Arret " + getArretAffecte() + " | " + getHeure() ;
     }
 }

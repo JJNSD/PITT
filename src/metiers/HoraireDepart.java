@@ -27,6 +27,10 @@ public class HoraireDepart {
         lesHorairesDepartEnCache.removeIf(h -> h.getId() == horaire.getId());
     }
 
+    public static void resetCache() {
+        lesHorairesDepartEnCache = new ArrayList<>();
+    }
+
     // ---------------- Objet ----------------
 
     private int id;

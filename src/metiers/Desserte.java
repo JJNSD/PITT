@@ -33,6 +33,22 @@ public class Desserte {
         lesDessertesEnCache.add(uneDesserte);
     }
 
+    public static void supprimerDuCache(Desserte uneDesserte) {
+        lesDessertesEnCache.removeIf(d -> d.getArretPrecedent().getId() == uneDesserte.getArretPrecedent().getId() && d.getArretSuivant().getId() == uneDesserte.getArretSuivant().getId() && d.getLigne().getId() == uneDesserte.getLigne().getId());
+    }
+
+    public static void supprimerDuCache(int idArretActuel, int idArretSuivant) {
+        lesDessertesEnCache.removeIf(d -> d.getArretPrecedent().getId() == idArretActuel && d.getArretSuivant().getId() == idArretSuivant);
+    }
+
+    public static void supprimerDuCache(int idLigne) {
+        lesDessertesEnCache.removeIf(d -> d.getLigne().getId() == idLigne);
+    }
+
+    public static void resetCache() {
+        lesDessertesEnCache = new ArrayList<>();
+    }
+
     // ---------------- Objet ----------------
 
     private Arret arretPrecedent;
@@ -89,5 +105,10 @@ public class Desserte {
         this.distance = distance;
 
         Desserte.addEnCache(this);
+    }
+
+    @Override
+    public String toString() {
+        return "L" + this.getLigne().getLibelle() + " ; AA " + this.getArretPrecedent() + " ; AS " + this.getArretSuivant();
     }
 }

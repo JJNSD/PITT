@@ -1,6 +1,7 @@
 package models;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import metiers.TypeTransport;
 
 import java.sql.*;
 import java.util.Properties;
@@ -40,5 +41,33 @@ public class ConnexionBDD {
         }
 
         return instanceConnexion;
+    }
+
+    public static boolean resetBDD() {
+        try {
+            // Chargement des DAOs
+            ArretDAO arretDAO = new ArretDAO();
+            DesserteDAO desserteDAO = new DesserteDAO();
+            HoraireDepartDAO horaireDepartDAO = new HoraireDepartDAO();
+            LigneDAO ligneDAO = new LigneDAO();
+            PerturbationDAO perturbationDAO = new PerturbationDAO();
+            TypeHoraireDAO typeHoraireDAO = new TypeHoraireDAO();
+            TypeTransportDAO typeTransportDAO = new TypeTransportDAO();
+
+            // Reset BDD table par table
+            desserteDAO.resetDesserte();
+            horaireDepartDAO.resetHoraireDepart();
+            typeHoraireDAO.resetTypeHoraire();
+            ligneDAO.resetLigne();
+            typeTransportDAO.resetTypeTransport();
+            perturbationDAO.resetPerturbation();
+            arretDAO.resetArret();
+
+            return true;
+        } catch (Exception e) {
+            System.out.println("Impossible de reset la BDD...");
+            e.printStackTrace();
+            return false;
+        }
     }
 }

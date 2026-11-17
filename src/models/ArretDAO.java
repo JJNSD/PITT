@@ -211,4 +211,21 @@ public class ArretDAO {
             return false;
         }
     }
+
+    public boolean resetArret() throws Exception {
+        String query = "DELETE FROM \"pitt-bdd\".arret";
+
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+            int arretsModifies = ps.executeUpdate();
+
+            Arret.resetCache();
+
+            return arretsModifies > 0;
+        } catch (SQLException e) {
+            System.err.println("ERREUR BDD lors de la suppression de la table Arret, Détails : ");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de la table Arret" , e);
+        }
+    }
 }

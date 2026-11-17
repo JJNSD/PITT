@@ -26,6 +26,10 @@ public class Ligne {
         lesLignesEnCache.removeIf(l -> l.getId() == ligne.getId());
     }
 
+    public static void resetCache() {
+        lesLignesEnCache = new ArrayList<>();
+    }
+
     // ---------------- Objet ----------------
 
     private int id;
