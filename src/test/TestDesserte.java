@@ -20,6 +20,11 @@ class TestDesserte {
 
     @BeforeEach
     void setUp() {
+        Arret.resetCache();
+        TypeTransport.resetCache();
+        Ligne.resetCache();
+        Desserte.resetCache();
+
         arretPrecedent = new Arret(
                 1001, "Arret_Test_1", 47.463532f, -0.545509f
         );
@@ -103,7 +108,7 @@ class TestDesserte {
         );
 
         assertNotNull(resultat);
-        assertEquals(desserte, resultat);
+        assertSame(desserte, resultat);
     }
 
     @Test

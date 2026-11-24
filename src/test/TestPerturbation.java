@@ -20,6 +20,9 @@ class TestPerturbation {
 
     @BeforeEach
     void setUp() {
+        Arret.resetCache();
+        Perturbation.resetCache();
+
         LocalDateTime debut = LocalDateTime.of(2026, 10, 23, 8, 0);
         LocalDateTime fin = LocalDateTime.of(2026, 10, 23, 12, 0);
 

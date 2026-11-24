@@ -13,6 +13,8 @@ class TestTypeTransport {
 
     @BeforeEach
     void setUp() {
+        TypeTransport.resetCache();
+
         typeTransport = new TypeTransport(
                 7001,
                 "Bus",
