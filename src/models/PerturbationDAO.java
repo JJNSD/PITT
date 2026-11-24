@@ -80,7 +80,7 @@ public class PerturbationDAO {
                         } else {
                             dateHeureDebut = null;
                         }
-                        if (dateHeureDebutString != null) {
+                        if (dateHeureFinString != null) {
                             dateHeureFin = LocalDateTime.parse(dateHeureFinString);
                         } else {
                             dateHeureFin = null;
@@ -129,7 +129,7 @@ public class PerturbationDAO {
                         } else {
                             dateHeureDebut = null;
                         }
-                        if (dateHeureDebutString != null) {
+                        if (dateHeureFinString != null) {
                             dateHeureFin = LocalDateTime.parse(dateHeureFinString);
                         } else {
                             dateHeureFin = null;
@@ -201,7 +201,7 @@ public class PerturbationDAO {
     }
 
     public boolean deletePerturbation(Perturbation perturbation) throws Exception {
-        if (deletePerturbationInArretPerturbe(perturbation.getId())) {
+            deletePerturbationInArretPerturbe(perturbation.getId());{
             String query = "DELETE FROM \"pitt-bdd\".perturbation WHERE idPerturbation = ?";
 
             try (PreparedStatement ps = connexion.prepareStatement(query)) {
@@ -219,9 +219,6 @@ public class PerturbationDAO {
                 e.printStackTrace();
                 throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + perturbation.getId(), e);
             }
-        } else {
-            System.err.println("ERREUR BDD lors de la suppression de la perturbation ID=" + perturbation.getId() + " dans ArretPerturbe");
-            return false;
         }
     }
 

@@ -187,28 +187,27 @@ public class ArretDAO {
     }
 
     public boolean deleteArret(Arret arret) throws Exception {
-        if (deleteArretInArretPerturbe(arret.getId())) {
-            String query = "DELETE FROM \"pitt-bdd\".arret WHERE idArret = ?";
+        // Suppression des associations avec les perturbations
+        deleteArretInArretPerturbe(arret.getId());
 
-            try (PreparedStatement ps = connexion.prepareStatement(query)) {
+        String query = "DELETE FROM \"pitt-bdd\".arret WHERE idArret = ?";
 
-                ps.setInt(1, arret.getId());
+        try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
-                int arretsModifies = ps.executeUpdate();
+            ps.setInt(1, arret.getId());
 
-                if (arretsModifies > 0) {
-                    Arret.supprimerDuCache(arret);
-                }
-                return arretsModifies > 0;
+            int arretsModifies = ps.executeUpdate();
 
-            } catch (SQLException e) {
-                System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + arret.getId() + ". Détails:");
-                e.printStackTrace();
-                throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + arret.getId(), e);
+            if (arretsModifies > 0) {
+                Arret.supprimerDuCache(arret);
             }
-        } else {
-            System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + arret.getId() + " dans ArretPerturbe");
-            return false;
+
+            return arretsModifies > 0;
+
+        } catch (SQLException e) {
+            System.err.println("ERREUR BDD lors de la suppression de l'arrêt ID=" + arret.getId() + ". Détails:");
+            e.printStackTrace();
+            throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + arret.getId(), e);
         }
     }
 

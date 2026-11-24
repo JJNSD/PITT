@@ -96,7 +96,7 @@ public class DesserteDAO {
 
         List<Desserte> lesDessertes = new ArrayList<>();
 
-        String query = "SELECT idArret_est_precede, idArret_est_suivi, duree, distance FROM \"pitt-bdd\".desserte WHERE idLigne = ?";
+        String query = "SELECT idArret_est_precede, idArret_est_suivi, idLigne, duree, distance FROM \"pitt-bdd\".desserte WHERE idLigne = ?";
 
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
 

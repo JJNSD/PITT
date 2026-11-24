@@ -79,11 +79,27 @@ public class TypeTransportDAO {
 
     public boolean insertTypeTransport(TypeTransport transport) throws Exception {
         String query = "INSERT INTO \"pitt-bdd\".typetransport (libelletypetransport, cout) VALUES (?, ?)";
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+
+        try (PreparedStatement ps = connexion.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, transport.getNomType());
             ps.setFloat(2, transport.getCout());
 
-            return ps.executeUpdate() > 0;
+            int typesTransportModifies = ps.executeUpdate();
+
+            if (typesTransportModifies == 0) {
+                return false;
+            }
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    transport.setId(generatedKeys.getInt(1));
+                } else {
+                    throw new Exception("Création du type de transport échouée, aucun identifiant récupéré.");
+                }
+            }
+
+            return true;
+
         } catch (Exception e) {
             System.err.println("ERREUR BDD lors de l'insertion du type de transport '" + transport.getNomType() + "'. Détails:");
             e.printStackTrace();

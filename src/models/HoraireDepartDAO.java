@@ -83,13 +83,15 @@ public class HoraireDepartDAO {
      * Insère un horaire de départ (l'id de l'objet est utilisé tel quel).
      */
     public boolean insertHoraireDepart(HoraireDepart horaire) throws Exception {
-        String query = "INSERT INTO \"pitt-bdd\".horairedepart (idligne, heuredepart, idtypehoraire) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO \"pitt-bdd\".horairedepart (idligne, heuredepart, idtypehoraire) VALUES (?, ?, ?)";
+
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
-            ps.setInt(2, horaire.getLigneAffecte().getId());
-            ps.setTime(3, Time.valueOf(horaire.getHeureDepart()));
-            ps.setInt(4, horaire.getTypeHoraire().getId());
+            ps.setInt(1, horaire.getLigneAffecte().getId());
+            ps.setTime(2, Time.valueOf(horaire.getHeureDepart()));
+            ps.setInt(3, horaire.getTypeHoraire().getId());
 
             return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             System.err.println("ERREUR BDD lors de l'insertion de l'horaire ID=" + horaire.getId() + ". Détails:");
             e.printStackTrace();
