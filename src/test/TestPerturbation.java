@@ -1,3 +1,4 @@
+
 package test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -109,7 +110,7 @@ class TestPerturbation {
 
     @Test
     void testArretAbsent() {
-        assertFalse(perturbation.arretPresent(arret));
+        assertFalse(perturbation.arretPresent(autreArret));
     }
 
     @Test

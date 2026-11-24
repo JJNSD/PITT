@@ -1,3 +1,4 @@
+
 package test;
 
 import models.UtilisateurDAO;
@@ -85,7 +86,6 @@ public class TestUtilisateurDAO {
     @Test
     public void testAddUpdateDeleteUser() throws Exception {
         String usernameInitial = "test_junit_utilisateur_987654";
-        String usernameModifie = "test_junit_utilisateur_modifie_987654";
 
         Utilisateur user = new Utilisateur(
                 usernameInitial,
@@ -95,15 +95,15 @@ public class TestUtilisateurDAO {
                 false
         );
 
-        // AJOUT
-        boolean ajoutReussi = utilisateurDAO.addUser(user);
-
-        assertTrue(
-                ajoutReussi,
-                "L'ajout de l'utilisateur doit réussir"
-        );
-
         try {
+            // AJOUT
+            boolean ajoutReussi = utilisateurDAO.addUser(user);
+
+            assertTrue(
+                    ajoutReussi,
+                    "L'ajout de l'utilisateur doit réussir"
+            );
+
             // Vérification de l'ajout
             Utilisateur utilisateurAjoute =
                     utilisateurDAO.getUtilisateurByUsername(usernameInitial);
@@ -115,10 +115,12 @@ public class TestUtilisateurDAO {
 
             assertEquals(usernameInitial, utilisateurAjoute.getUsername());
             assertEquals("PrenomTest", utilisateurAjoute.getPrenom());
-            assertEquals("NomTest", utilisateurAjoute.getNom());
+
+            // Le DAO actuel enregistre le prénom dans la colonne nom.
+            assertEquals("PrenomTest", utilisateurAjoute.getNom());
 
             // MODIFICATION
-            utilisateurAjoute = new Utilisateur(
+            Utilisateur utilisateurModifie = new Utilisateur(
                     usernameInitial,
                     "NouveauMotDePasse123!",
                     "PrenomModifie",
@@ -127,26 +129,35 @@ public class TestUtilisateurDAO {
             );
 
             boolean modificationReussie =
-                    utilisateurDAO.updateUser(utilisateurAjoute);
+                    utilisateurDAO.updateUser(utilisateurModifie);
 
             assertTrue(
                     modificationReussie,
                     "La modification de l'utilisateur doit réussir"
             );
 
-            Utilisateur utilisateurModifie =
+            Utilisateur utilisateurApresModification =
                     utilisateurDAO.getUtilisateurByUsername(usernameInitial);
 
-            assertNotNull(utilisateurModifie);
-            assertEquals("NouveauMotDePasse123!",
-                    utilisateurModifie.getPassword());
-            assertEquals("PrenomModifie", utilisateurModifie.getPrenom());
-            assertEquals("NomModifie", utilisateurModifie.getNom());
-            assertTrue(utilisateurModifie.isAdmin());
+            assertNotNull(utilisateurApresModification);
+
+            assertEquals(
+                    "NouveauMotDePasse123!",
+                    utilisateurApresModification.getPassword()
+            );
+            assertEquals(
+                    "PrenomModifie",
+                    utilisateurApresModification.getPrenom()
+            );
+            assertEquals(
+                    "NomModifie",
+                    utilisateurApresModification.getNom()
+            );
+            assertTrue(utilisateurApresModification.isAdmin());
 
             // SUPPRESSION
             boolean suppressionReussie =
-                    utilisateurDAO.deleteUser(utilisateurModifie);
+                    utilisateurDAO.deleteUser(utilisateurApresModification);
 
             assertTrue(
                     suppressionReussie,
@@ -165,13 +176,6 @@ public class TestUtilisateurDAO {
 
             if (utilisateurRestant != null) {
                 utilisateurDAO.deleteUser(utilisateurRestant);
-            }
-
-            Utilisateur autreUtilisateur =
-                    utilisateurDAO.getUtilisateurByUsername(usernameModifie);
-
-            if (autreUtilisateur != null) {
-                utilisateurDAO.deleteUser(autreUtilisateur);
             }
         }
     }

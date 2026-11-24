@@ -14,6 +14,9 @@ import metiers.Ligne;
 import metiers.TypeHoraire;
 import metiers.TypeTransport;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
 class TestHoraire {
 
     private Arret arret;
@@ -23,8 +26,11 @@ class TestHoraire {
     private TypeHoraire typeHoraire;
     private Horaire horaire;
 
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
+        Horaire.resetCache();
+
         arret = new Arret(
                 2001, "Arret_Horaire_1", 47.463532f, -0.545509f
         );
@@ -53,6 +59,13 @@ class TestHoraire {
                 arret,
                 typeHoraire
         );
+
+        // Ajout de l'horaire au cache pour les tests
+        Field champ = Horaire.class.getDeclaredField("lesHoraires");
+        champ.setAccessible(true);
+
+        List<Horaire> cache = (List<Horaire>) champ.get(null);
+        cache.add(horaire);
     }
 
     @Test
