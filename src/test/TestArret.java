@@ -17,6 +17,7 @@ class TestArret {
 
     @BeforeEach
     void setUp() {
+        Arret.resetCache();
         arret = new Arret(
                 1,
                 "Gare_de_Tours",

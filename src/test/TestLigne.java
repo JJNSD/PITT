@@ -18,6 +18,10 @@ class TestLigne {
 
     @BeforeEach
     void setUp() {
+        Arret.resetCache();
+        TypeTransport.resetCache();
+        Ligne.resetCache();
+
         terminusDepart = new Arret(
                 4001, "Terminus_Depart", 47.463532f, -0.545509f
         );

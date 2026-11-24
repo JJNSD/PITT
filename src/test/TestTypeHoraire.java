@@ -13,6 +13,7 @@ class TestTypeHoraire {
 
     @BeforeEach
     void setUp() {
+        TypeHoraire.resetCache();
         typeHoraire = new TypeHoraire(
                 6001,
                 "Départ"
