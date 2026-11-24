@@ -43,14 +43,14 @@ public class Main {
 
         while(true) {
             System.out.println("Ecrivez une commande ('help' pour le message d'aide) : ");
-            String command = r.readLine();
+            String command = r.readLine().toLowerCase();
 
             switch (command) {
                 case "help":
                     printHelp();
                     break;
 
-                case "chargerBddCSV":
+                case "chargerbddcsv":
                     try {
                         System.out.println("Ecrivez le chemin du dossier : ");
                         String path = r.readLine();
@@ -69,7 +69,7 @@ public class Main {
                     }
                     break;
 
-                case "setFacteurDuree":
+                case "setfacteurduree":
                     try {
                         System.out.println("Entrez le facteur : ");
                         String facteur = r.readLine();
@@ -85,7 +85,7 @@ public class Main {
                     }
                     break;
 
-                case "setFacteurDistance":
+                case "setfacteurdistance":
                     try {
                         System.out.println("Entrez le facteur : ");
                         String facteur = r.readLine();
@@ -101,7 +101,7 @@ public class Main {
                     }
                     break;
 
-                case "setFacteurCoutMonetaire":
+                case "setfacteurcoutmonetaire":
                     try {
                         System.out.println("Entrez le facteur : ");
                         String facteur = r.readLine();
@@ -117,7 +117,7 @@ public class Main {
                     }
                     break;
 
-                case "loadGraphe":
+                case "loadgraphe":
                     if (facteurDuree == 0 && facteurDistance == 0 && facteurCoutMonetaire == 0) {
                         System.out.println("Impossible de charger le graphe, facteur(s) manquant(s).");
                     } else {
@@ -137,7 +137,7 @@ public class Main {
                     }
                     break;
 
-                case "setArret1":
+                case "setarret1":
                     try {
                         System.out.println("Entrez l'ID de l'arrêt souhaité : ");
                         int idArret = Integer.parseInt(r.readLine());
@@ -152,7 +152,7 @@ public class Main {
                     }
                     break;
 
-                case "setArret2":
+                case "setarret2":
                     try {
                         System.out.println("Entrez l'ID de l'arrêt souhaité : ");
                         int idArret = Integer.parseInt(r.readLine());
@@ -167,7 +167,7 @@ public class Main {
                     }
                     break;
 
-                case "setHoraireDepart":
+                case "sethorairedepart":
                     try {
                         DateTimeFormatter parser = DateTimeFormatter.ofPattern("hh:mm:ss");
 
@@ -183,7 +183,7 @@ public class Main {
                     }
                     break;
 
-                case "doDjikstra":
+                case "dodjikstra":
                     try {
                         if (leGraphe == null) {
                             System.out.println("Erreur : Chargez le graphe.");
@@ -205,7 +205,7 @@ public class Main {
                     }
                     break;
 
-                case "doA*":
+                case "doa*":
                     try {
                         if (leGraphe == null) {
                             System.out.println("Erreur : Chargez le graphe.");
@@ -227,7 +227,7 @@ public class Main {
                     }
                     break;
 
-                case "doBFS":
+                case "dobfs":
                     try {
                         if (leGraphe == null) {
                             System.out.println("Erreur : Chargez le graphe.");
