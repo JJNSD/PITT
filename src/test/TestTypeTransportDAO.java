@@ -26,11 +26,13 @@ public class TestTypeTransportDAO {
                 typeTransportDAO.getAllTypeTransport();
 
         assertNotNull(typesTransport, "La liste ne doit pas être null");
+        assertFalse(typesTransport.isEmpty(), "La liste doit contenir au moins un type de transport");
 
         for (TypeTransport type : typesTransport) {
             assertNotNull(type);
             assertTrue(type.getId() > 0);
             assertNotNull(type.getNomType());
+            assertFalse(type.getNomType().isEmpty());
             assertTrue(type.getCout() >= 0);
 
             System.out.println(

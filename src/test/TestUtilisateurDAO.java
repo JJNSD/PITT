@@ -16,7 +16,7 @@ public class TestUtilisateurDAO {
 
     @Test
     public void testGetAllUtilisateurs() throws Exception {
-        List<Utilisateur> utilisateurs = utilisateurDAO.getAllArrets();
+        List<Utilisateur> utilisateurs = utilisateurDAO.getAllUtilisateurs();
 
         assertNotNull(utilisateurs, "La liste ne doit pas être null");
 
@@ -37,7 +37,8 @@ public class TestUtilisateurDAO {
 
     @Test
     public void testGetUtilisateurByUsername() throws Exception {
-        List<Utilisateur> utilisateurs = utilisateurDAO.getAllArrets();
+
+        List<Utilisateur> utilisateurs = utilisateurDAO.getAllUtilisateurs();
 
         assertFalse(
                 utilisateurs.isEmpty(),
@@ -51,19 +52,26 @@ public class TestUtilisateurDAO {
                         utilisateurAttendu.getUsername()
                 );
 
-        assertNotNull(utilisateurTrouve);
+        assertNotNull(
+                utilisateurTrouve,
+                "L'utilisateur doit être retrouvé"
+        );
+
         assertEquals(
                 utilisateurAttendu.getUsername(),
                 utilisateurTrouve.getUsername()
         );
+
         assertEquals(
                 utilisateurAttendu.getPrenom(),
                 utilisateurTrouve.getPrenom()
         );
+
         assertEquals(
                 utilisateurAttendu.getNom(),
                 utilisateurTrouve.getNom()
         );
+
         assertEquals(
                 utilisateurAttendu.isAdmin(),
                 utilisateurTrouve.isAdmin()
@@ -85,6 +93,7 @@ public class TestUtilisateurDAO {
 
     @Test
     public void testAddUpdateDeleteUser() throws Exception {
+
         String usernameInitial = "test_junit_utilisateur_987654";
 
         Utilisateur user = new Utilisateur(
@@ -116,7 +125,7 @@ public class TestUtilisateurDAO {
             assertEquals(usernameInitial, utilisateurAjoute.getUsername());
             assertEquals("PrenomTest", utilisateurAjoute.getPrenom());
 
-            // Le DAO actuel enregistre le prénom dans la colonne nom.
+            // Le DAO enregistre actuellement le prénom dans la colonne nom.
             assertEquals("PrenomTest", utilisateurAjoute.getNom());
 
             // MODIFICATION
@@ -136,6 +145,7 @@ public class TestUtilisateurDAO {
                     "La modification de l'utilisateur doit réussir"
             );
 
+            // Vérification de la modification
             Utilisateur utilisateurApresModification =
                     utilisateurDAO.getUtilisateurByUsername(usernameInitial);
 
@@ -145,14 +155,17 @@ public class TestUtilisateurDAO {
                     "NouveauMotDePasse123!",
                     utilisateurApresModification.getPassword()
             );
+
             assertEquals(
                     "PrenomModifie",
                     utilisateurApresModification.getPrenom()
             );
+
             assertEquals(
                     "NomModifie",
                     utilisateurApresModification.getNom()
             );
+
             assertTrue(utilisateurApresModification.isAdmin());
 
             // SUPPRESSION

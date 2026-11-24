@@ -61,34 +61,22 @@ public class TestPerturbationDAO {
 
     @Test
     public void testGetPerturbationByID() throws Exception {
-        List<Perturbation> perturbations =
-                perturbationDAO.getAllPerturbations();
+        List<Perturbation> perturbations = perturbationDAO.getAllPerturbations();
 
-        assertFalse(
-                perturbations.isEmpty(),
-                "La base doit contenir au moins une perturbation"
-        );
+        assertNotNull(perturbations);
+        assertFalse(perturbations.isEmpty());
 
         Perturbation attendue = perturbations.get(0);
 
-        Perturbation trouvee =
-                perturbationDAO.getPerturbationByID(attendue.getId());
+        Perturbation.resetCache();
 
-        assertNotNull(
-                trouvee,
-                "La perturbation doit être retrouvée"
-        );
+        Perturbation resultat = perturbationDAO.getPerturbationByID(attendue.getId());
 
-        assertEquals(attendue.getId(), trouvee.getId());
-        assertEquals(attendue.getLibelle(), trouvee.getLibelle());
-        assertEquals(
-                attendue.getDateHeureDebut(),
-                trouvee.getDateHeureDebut()
-        );
-        assertEquals(
-                attendue.getDateHeureFin(),
-                trouvee.getDateHeureFin()
-        );
+        assertNotNull(resultat);
+        assertEquals(attendue.getId(), resultat.getId());
+        assertEquals(attendue.getLibelle(), resultat.getLibelle());
+        assertEquals(attendue.getDateHeureDebut(), resultat.getDateHeureDebut());
+        assertEquals(attendue.getDateHeureFin(), resultat.getDateHeureFin());
     }
 
     @Test
