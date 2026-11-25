@@ -4,10 +4,7 @@ import metiers.Arret;
 import metiers.HoraireDepart;
 import metiers.Perturbation;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +77,7 @@ public class PerturbationDAO {
                         } else {
                             dateHeureDebut = null;
                         }
-                        if (dateHeureDebutString != null) {
+                        if (dateHeureFinString != null) {
                             dateHeureFin = LocalDateTime.parse(dateHeureFinString);
                         } else {
                             dateHeureFin = null;
@@ -129,7 +126,7 @@ public class PerturbationDAO {
                         } else {
                             dateHeureDebut = null;
                         }
-                        if (dateHeureDebutString != null) {
+                        if (dateHeureFinString != null) {
                             dateHeureFin = LocalDateTime.parse(dateHeureFinString);
                         } else {
                             dateHeureFin = null;
@@ -153,10 +150,10 @@ public class PerturbationDAO {
     public boolean addPerturbation(Perturbation perturbation) throws Exception {
         String query = "INSERT INTO \"pitt-bdd\".perturbation (libelle, dateheuredebut, dateheurefin) VALUES (?, ?, ?)";
 
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+        try (PreparedStatement ps = connexion.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, perturbation.getLibelle());
-            ps.setString(2, perturbation.getDateHeureDebut().toString());
-            ps.setString(3, perturbation.getDateHeureFin().toString());
+            ps.setObject(2, perturbation.getDateHeureDebut());
+            ps.setObject(3, perturbation.getDateHeureFin());
 
             int perturbationsModifiees = ps.executeUpdate();
 
@@ -186,8 +183,8 @@ public class PerturbationDAO {
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
             ps.setString(1, perturbation.getLibelle());
-            ps.setString(2, perturbation.getDateHeureDebut().toString());
-            ps.setString(3, perturbation.getDateHeureFin().toString());
+            ps.setObject(2, perturbation.getDateHeureDebut());
+            ps.setObject(3, perturbation.getDateHeureFin());
             ps.setInt(4, perturbation.getId());
 
             int perturbationsModifiees = ps.executeUpdate();
@@ -201,7 +198,7 @@ public class PerturbationDAO {
     }
 
     public boolean deletePerturbation(Perturbation perturbation) throws Exception {
-        if (deletePerturbationInArretPerturbe(perturbation.getId())) {
+            deletePerturbationInArretPerturbe(perturbation.getId());{
             String query = "DELETE FROM \"pitt-bdd\".perturbation WHERE idPerturbation = ?";
 
             try (PreparedStatement ps = connexion.prepareStatement(query)) {
@@ -219,9 +216,6 @@ public class PerturbationDAO {
                 e.printStackTrace();
                 throw new Exception("Erreur lors de la suppression de l'arrêt avec ID : " + perturbation.getId(), e);
             }
-        } else {
-            System.err.println("ERREUR BDD lors de la suppression de la perturbation ID=" + perturbation.getId() + " dans ArretPerturbe");
-            return false;
         }
     }
 

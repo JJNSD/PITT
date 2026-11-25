@@ -1,3 +1,4 @@
+
 package test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,6 +21,9 @@ class TestPerturbation {
 
     @BeforeEach
     void setUp() {
+        Arret.resetCache();
+        Perturbation.resetCache();
+
         LocalDateTime debut = LocalDateTime.of(2026, 10, 23, 8, 0);
         LocalDateTime fin = LocalDateTime.of(2026, 10, 23, 12, 0);
 
@@ -106,7 +110,7 @@ class TestPerturbation {
 
     @Test
     void testArretAbsent() {
-        assertFalse(perturbation.arretPresent(arret));
+        assertFalse(perturbation.arretPresent(autreArret));
     }
 
     @Test

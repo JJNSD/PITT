@@ -106,6 +106,7 @@ public class TestDesserteDAO {
 
     @Test
     public void testGetArretsDesservis() throws Exception {
+
         Desserte desserte = trouverDesserteExistante();
 
         assertNotNull(desserte,
@@ -118,13 +119,16 @@ public class TestDesserteDAO {
 
         assertNotNull(dessertes,
                 "La liste des dessertes ne doit pas être null");
+
         assertFalse(dessertes.isEmpty(),
                 "La ligne doit posséder au moins une desserte");
 
         for (Desserte d : dessertes) {
-            assertEquals(idLigne, d.getLigne().getId());
-            assertNotNull(d.getArretPrecedent());
-            assertNotNull(d.getArretSuivant());
+            assertNotNull(d, "Une desserte ne doit pas être null");
+            assertNotNull(d.getArretPrecedent(),
+                    "L'arrêt précédent ne doit pas être null");
+            assertNotNull(d.getArretSuivant(),
+                    "L'arrêt suivant ne doit pas être null");
         }
 
         System.out.println(

@@ -40,7 +40,7 @@ public class UtilisateurDAO {
         }
     }
 
-    public List<Utilisateur> getAllArrets() throws Exception {
+    public List<Utilisateur> getAllUtilisateurs() throws Exception {
         List<Utilisateur> lesUsers = new ArrayList<>();
 
         String query = "SELECT username, password, prenom, nom, isAdmin FROM \"pitt-bdd\".utilisateur";
@@ -72,7 +72,7 @@ public class UtilisateurDAO {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getPrenom());
-            ps.setString(4, user.getPrenom());
+            ps.setString(4, user.getNom());
             ps.setBoolean(5, user.isAdmin());
 
             int arretsModifies = ps.executeUpdate();

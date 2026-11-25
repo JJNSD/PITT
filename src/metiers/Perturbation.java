@@ -87,8 +87,8 @@ public class Perturbation {
     }
 
     public void ajouterUnArretPerturbe(Arret arret) {
-        this.arretsPerturbes.add(arret);
-        if (arretPresent(arret)) {
+        if (!arretPresent(arret)) {
+            this.arretsPerturbes.add(arret);
             arret.ajouterPerturbation(this);
         }
     }

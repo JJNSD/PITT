@@ -1,3 +1,4 @@
+
 package test;
 
 import models.UtilisateurDAO;
@@ -15,7 +16,7 @@ public class TestUtilisateurDAO {
 
     @Test
     public void testGetAllUtilisateurs() throws Exception {
-        List<Utilisateur> utilisateurs = utilisateurDAO.getAllArrets();
+        List<Utilisateur> utilisateurs = utilisateurDAO.getAllUtilisateurs();
 
         assertNotNull(utilisateurs, "La liste ne doit pas être null");
 
@@ -34,40 +35,49 @@ public class TestUtilisateurDAO {
         }
     }
 
+
     @Test
     public void testGetUtilisateurByUsername() throws Exception {
-        List<Utilisateur> utilisateurs = utilisateurDAO.getAllArrets();
 
-        assertFalse(
-                utilisateurs.isEmpty(),
-                "La table doit contenir au moins un utilisateur"
-        );
+        String usernameTest = "test_junit_utilisateur_987654";
+
+        // Récupération d'un utilisateur existant
+        List<Utilisateur> utilisateurs = utilisateurDAO.getAllUtilisateurs();
+
+        assertNotNull(utilisateurs,
+                "La liste des utilisateurs ne doit pas être null");
+
+        assertFalse(utilisateurs.isEmpty(),
+                "La table doit contenir au moins un utilisateur");
 
         Utilisateur utilisateurAttendu = utilisateurs.get(0);
 
+        // Recherche par username
         Utilisateur utilisateurTrouve =
                 utilisateurDAO.getUtilisateurByUsername(
                         utilisateurAttendu.getUsername()
                 );
 
-        assertNotNull(utilisateurTrouve);
-        assertEquals(
-                utilisateurAttendu.getUsername(),
-                utilisateurTrouve.getUsername()
-        );
-        assertEquals(
-                utilisateurAttendu.getPrenom(),
-                utilisateurTrouve.getPrenom()
-        );
-        assertEquals(
-                utilisateurAttendu.getNom(),
-                utilisateurTrouve.getNom()
-        );
-        assertEquals(
-                utilisateurAttendu.isAdmin(),
-                utilisateurTrouve.isAdmin()
-        );
+        assertNotNull(utilisateurTrouve,
+                "L'utilisateur doit être retrouvé");
+
+        // Vérification des informations
+        assertEquals(utilisateurAttendu.getUsername(),
+                utilisateurTrouve.getUsername());
+
+        assertEquals(utilisateurAttendu.getPassword(),
+                utilisateurTrouve.getPassword());
+
+        assertEquals(utilisateurAttendu.getPrenom(),
+                utilisateurTrouve.getPrenom());
+
+        assertEquals(utilisateurAttendu.getNom(),
+                utilisateurTrouve.getNom());
+
+        assertEquals(utilisateurAttendu.isAdmin(),
+                utilisateurTrouve.isAdmin());
     }
+
 
     @Test
     public void testGetUtilisateurByUsernameInexistant() throws Exception {
@@ -82,10 +92,11 @@ public class TestUtilisateurDAO {
         );
     }
 
+
     @Test
     public void testAddUpdateDeleteUser() throws Exception {
+
         String usernameInitial = "test_junit_utilisateur_987654";
-        String usernameModifie = "test_junit_utilisateur_modifie_987654";
 
         Utilisateur user = new Utilisateur(
                 usernameInitial,
@@ -95,30 +106,27 @@ public class TestUtilisateurDAO {
                 false
         );
 
-        // AJOUT
-        boolean ajoutReussi = utilisateurDAO.addUser(user);
-
-        assertTrue(
-                ajoutReussi,
-                "L'ajout de l'utilisateur doit réussir"
-        );
-
         try {
+            // AJOUT
+            boolean ajoutReussi = utilisateurDAO.addUser(user);
+
+            assertTrue(ajoutReussi,
+                    "L'ajout de l'utilisateur doit réussir");
+
             // Vérification de l'ajout
             Utilisateur utilisateurAjoute =
                     utilisateurDAO.getUtilisateurByUsername(usernameInitial);
 
-            assertNotNull(
-                    utilisateurAjoute,
-                    "L'utilisateur ajouté doit être retrouvé en base"
-            );
+            assertNotNull(utilisateurAjoute,
+                    "L'utilisateur ajouté doit être retrouvé en base");
 
             assertEquals(usernameInitial, utilisateurAjoute.getUsername());
             assertEquals("PrenomTest", utilisateurAjoute.getPrenom());
             assertEquals("NomTest", utilisateurAjoute.getNom());
+            assertFalse(utilisateurAjoute.isAdmin());
 
             // MODIFICATION
-            utilisateurAjoute = new Utilisateur(
+            Utilisateur utilisateurModifie = new Utilisateur(
                     usernameInitial,
                     "NouveauMotDePasse123!",
                     "PrenomModifie",
@@ -127,36 +135,37 @@ public class TestUtilisateurDAO {
             );
 
             boolean modificationReussie =
-                    utilisateurDAO.updateUser(utilisateurAjoute);
+                    utilisateurDAO.updateUser(utilisateurModifie);
 
-            assertTrue(
-                    modificationReussie,
-                    "La modification de l'utilisateur doit réussir"
-            );
+            assertTrue(modificationReussie,
+                    "La modification de l'utilisateur doit réussir");
 
-            Utilisateur utilisateurModifie =
+            // Vérification de la modification
+            Utilisateur utilisateurApresModification =
                     utilisateurDAO.getUtilisateurByUsername(usernameInitial);
 
-            assertNotNull(utilisateurModifie);
+            assertNotNull(utilisateurApresModification);
+
             assertEquals("NouveauMotDePasse123!",
-                    utilisateurModifie.getPassword());
-            assertEquals("PrenomModifie", utilisateurModifie.getPrenom());
-            assertEquals("NomModifie", utilisateurModifie.getNom());
-            assertTrue(utilisateurModifie.isAdmin());
+                    utilisateurApresModification.getPassword().trim());
+
+            assertEquals("PrenomModifie",
+                    utilisateurApresModification.getPrenom());
+
+            assertEquals("NomModifie",
+                    utilisateurApresModification.getNom());
+
+            assertTrue(utilisateurApresModification.isAdmin());
 
             // SUPPRESSION
             boolean suppressionReussie =
-                    utilisateurDAO.deleteUser(utilisateurModifie);
+                    utilisateurDAO.deleteUser(utilisateurApresModification);
 
-            assertTrue(
-                    suppressionReussie,
-                    "La suppression de l'utilisateur doit réussir"
-            );
+            assertTrue(suppressionReussie,
+                    "La suppression de l'utilisateur doit réussir");
 
-            assertNull(
-                    utilisateurDAO.getUtilisateurByUsername(usernameInitial),
-                    "L'utilisateur supprimé ne doit plus être retrouvé"
-            );
+            assertNull(utilisateurDAO.getUtilisateurByUsername(usernameInitial),
+                    "L'utilisateur supprimé ne doit plus être retrouvé");
 
         } finally {
             // Nettoyage si le test échoue avant la suppression
@@ -166,13 +175,7 @@ public class TestUtilisateurDAO {
             if (utilisateurRestant != null) {
                 utilisateurDAO.deleteUser(utilisateurRestant);
             }
-
-            Utilisateur autreUtilisateur =
-                    utilisateurDAO.getUtilisateurByUsername(usernameModifie);
-
-            if (autreUtilisateur != null) {
-                utilisateurDAO.deleteUser(autreUtilisateur);
-            }
         }
     }
+
 }

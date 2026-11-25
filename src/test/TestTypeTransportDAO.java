@@ -1,9 +1,11 @@
+
 package test;
 
 import models.TypeTransportDAO;
 import metiers.TypeTransport;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
 
@@ -13,18 +15,25 @@ public class TestTypeTransportDAO {
 
     private final TypeTransportDAO typeTransportDAO = new TypeTransportDAO();
 
+    @BeforeEach
+    public void setUp() {
+        TypeTransport.resetCache();
+    }
+
     @Test
     public void testGetAllTypeTransport() throws Exception {
         List<TypeTransport> typesTransport =
                 typeTransportDAO.getAllTypeTransport();
 
         assertNotNull(typesTransport, "La liste ne doit pas être null");
+        assertFalse(typesTransport.isEmpty(), "La liste doit contenir au moins un type de transport");
 
         for (TypeTransport type : typesTransport) {
-            assertNotNull(type, "Un type de transport ne doit pas être null");
-            assertTrue(type.getId() > 0, "L'identifiant doit être positif");
-            assertNotNull(type.getNomType(), "Le nom ne doit pas être null");
-            assertTrue(type.getCout() >= 0, "Le coût doit être positif ou nul");
+            assertNotNull(type);
+            assertTrue(type.getId() > 0);
+            assertNotNull(type.getNomType());
+            assertFalse(type.getNomType().isEmpty());
+            assertTrue(type.getCout() >= 0);
 
             System.out.println(
                     "ID : " + type.getId()
@@ -39,10 +48,7 @@ public class TestTypeTransportDAO {
         List<TypeTransport> typesTransport =
                 typeTransportDAO.getAllTypeTransport();
 
-        assertFalse(
-                typesTransport.isEmpty(),
-                "La table doit contenir au moins un type de transport"
-        );
+        assertFalse(typesTransport.isEmpty());
 
         TypeTransport typeAttendu = typesTransport.get(0);
 
@@ -68,36 +74,38 @@ public class TestTypeTransportDAO {
 
     @Test
     public void testInsertUpdateDeleteTypeTransport() throws Exception {
+
         String nomInitial = "TypeTransportTestJUnit";
         String nomModifie = "TypeTransportTestJUnitModifie";
 
         TypeTransport type = new TypeTransport(0, nomInitial, 1.50f);
 
-        // INSERTION
-        boolean insertionReussie =
-                typeTransportDAO.insertTypeTransport(type);
-
-        assertTrue(
-                insertionReussie,
-                "L'insertion du type de transport doit réussir"
-        );
-
-        // Recherche du type inséré
-        TypeTransport typeInsere = null;
-
-        for (TypeTransport t : typeTransportDAO.getAllTypeTransport()) {
-            if (nomInitial.equals(t.getNomType())) {
-                typeInsere = t;
-                break;
-            }
-        }
-
-        assertNotNull(
-                typeInsere,
-                "Le type de transport inséré doit être retrouvé en base"
-        );
+        int idTypeInsere = -1;
 
         try {
+            // INSERTION
+            boolean insertionReussie =
+                    typeTransportDAO.insertTypeTransport(type);
+
+            assertTrue(insertionReussie);
+
+            // RECHERCHE DE L'OBJET INSÉRÉ
+            TypeTransport typeInsere = null;
+
+            for (TypeTransport t : typeTransportDAO.getAllTypeTransport()) {
+                if (nomInitial.equals(t.getNomType())) {
+                    typeInsere = t;
+                    break;
+                }
+            }
+
+            assertNotNull(
+                    typeInsere,
+                    "Le type inséré doit être retrouvé en base"
+            );
+
+            idTypeInsere = typeInsere.getId();
+
             // MODIFICATION
             typeInsere.setNomType(nomModifie);
             typeInsere.setCout(2.00f);
@@ -105,13 +113,13 @@ public class TestTypeTransportDAO {
             boolean modificationReussie =
                     typeTransportDAO.updateTypeTransport(typeInsere);
 
-            assertTrue(
-                    modificationReussie,
-                    "La modification doit réussir"
-            );
+            assertTrue(modificationReussie);
+
+            // Réinitialisation du cache pour relire les données en BDD
+            TypeTransport.resetCache();
 
             TypeTransport typeModifie =
-                    typeTransportDAO.getTypeTransportByID(typeInsere.getId());
+                    typeTransportDAO.getTypeTransportByID(idTypeInsere);
 
             assertNotNull(typeModifie);
             assertEquals(nomModifie, typeModifie.getNomType());
@@ -119,20 +127,21 @@ public class TestTypeTransportDAO {
 
             // SUPPRESSION
             boolean suppressionReussie =
-                    typeTransportDAO.deleteTypeTransport(typeInsere);
+                    typeTransportDAO.deleteTypeTransport(typeModifie);
 
-            assertTrue(
-                    suppressionReussie,
-                    "La suppression doit réussir"
-            );
+            assertTrue(suppressionReussie);
+
+            TypeTransport.resetCache();
 
             assertNull(
-                    typeTransportDAO.getTypeTransportByID(typeInsere.getId()),
+                    typeTransportDAO.getTypeTransportByID(idTypeInsere),
                     "Le type supprimé ne doit plus être retrouvé"
             );
 
         } finally {
-            // Nettoyage si le test échoue avant la suppression
+            // NETTOYAGE EN CAS D'ÉCHEC
+            TypeTransport.resetCache();
+
             List<TypeTransport> typesRestants =
                     typeTransportDAO.getAllTypeTransport();
 
@@ -142,6 +151,8 @@ public class TestTypeTransportDAO {
                     typeTransportDAO.deleteTypeTransport(t);
                 }
             }
+
+            TypeTransport.resetCache();
         }
     }
 }

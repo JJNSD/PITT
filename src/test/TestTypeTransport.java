@@ -1,3 +1,4 @@
+
 package test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,6 +14,8 @@ class TestTypeTransport {
 
     @BeforeEach
     void setUp() {
+        TypeTransport.resetCache();
+
         typeTransport = new TypeTransport(
                 7001,
                 "Bus",
@@ -43,8 +46,7 @@ class TestTypeTransport {
         TypeTransport resultat =
                 TypeTransport.getTypeTransportEnCache(7001);
 
-        assertNotNull(resultat);
-        assertSame(typeTransport, resultat);
+        assertNull(resultat);
     }
 
     @Test

@@ -24,32 +24,19 @@ class TestHoraireDepart {
 
     @BeforeEach
     void setUp() {
-        terminusDepart = new Arret(
-                3001, "Terminus_Depart", 47.463532f, -0.545509f
-        );
+        HoraireDepart.resetCache();
 
-        terminusArrivee = new Arret(
-                3002, "Terminus_Arrivee", 47.464661f, -0.548248f
-        );
-
+        terminusDepart = new Arret(3001, "Terminus_Depart", 47.463532f, -0.545509f);
+        terminusArrivee = new Arret(3002, "Terminus_Arrivee", 47.464661f, -0.548248f);
         typeTransport = new TypeTransport(3001, "Bus", 1.70f);
 
-        ligne = new Ligne(
-                3001,
-                "Ligne_HoraireDepart",
-                "#FF0000",
-                terminusDepart,
-                terminusArrivee,
-                typeTransport
-        );
+        ligne = new Ligne(3001, "Ligne_HoraireDepart", "#FF0000",
+                terminusDepart, terminusArrivee, typeTransport);
 
         typeHoraire = new TypeHoraire(3001, "Départ");
 
         horaireDepart = new HoraireDepart(
-                3001,
-                ligne,
-                LocalTime.of(8, 30),
-                typeHoraire
+                3001, ligne, LocalTime.of(8, 30), typeHoraire
         );
     }
 
