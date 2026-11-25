@@ -59,25 +59,47 @@ public class TestPerturbationDAO {
         }
     }
 
+
     @Test
     public void testGetPerturbationByID() throws Exception {
-        List<Perturbation> perturbations = perturbationDAO.getAllPerturbations();
 
-        assertNotNull(perturbations);
-        assertFalse(perturbations.isEmpty());
+        // Récupération d'une perturbation existante
+        List<Perturbation> perturbations =
+                perturbationDAO.getAllPerturbations();
+
+        assertNotNull(perturbations,
+                "La liste ne doit pas être null");
+
+        assertFalse(perturbations.isEmpty(),
+                "La base doit contenir au moins une perturbation");
 
         Perturbation attendue = perturbations.get(0);
 
+        // Réinitialisation du cache pour forcer la lecture en BDD
         Perturbation.resetCache();
 
-        Perturbation resultat = perturbationDAO.getPerturbationByID(attendue.getId());
+        // Recherche par identifiant
+        Perturbation resultat =
+                perturbationDAO.getPerturbationByID(attendue.getId());
 
-        assertNotNull(resultat);
+        assertNotNull(resultat,
+                "La perturbation doit être retrouvée");
+
+        // Vérification des informations
         assertEquals(attendue.getId(), resultat.getId());
+
         assertEquals(attendue.getLibelle(), resultat.getLibelle());
-        assertEquals(attendue.getDateHeureDebut(), resultat.getDateHeureDebut());
-        assertEquals(attendue.getDateHeureFin(), resultat.getDateHeureFin());
+
+        assertEquals(attendue.getDateHeureDebut(),
+                resultat.getDateHeureDebut());
+
+        assertEquals(attendue.getDateHeureFin(),
+                resultat.getDateHeureFin());
+
+        assertNotNull(resultat.getArretsPerturbes(),
+                "La liste des arrêts perturbés ne doit pas être null");
     }
+
 
     @Test
     public void testGetPerturbationByIDInexistant() throws Exception {

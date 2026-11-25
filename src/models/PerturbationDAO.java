@@ -4,10 +4,7 @@ import metiers.Arret;
 import metiers.HoraireDepart;
 import metiers.Perturbation;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -153,7 +150,7 @@ public class PerturbationDAO {
     public boolean addPerturbation(Perturbation perturbation) throws Exception {
         String query = "INSERT INTO \"pitt-bdd\".perturbation (libelle, dateheuredebut, dateheurefin) VALUES (?, ?, ?)";
 
-        try (PreparedStatement ps = connexion.prepareStatement(query)) {
+        try (PreparedStatement ps = connexion.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, perturbation.getLibelle());
             ps.setString(2, perturbation.getDateHeureDebut().toString());
             ps.setString(3, perturbation.getDateHeureFin().toString());
