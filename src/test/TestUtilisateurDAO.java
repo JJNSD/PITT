@@ -35,48 +35,49 @@ public class TestUtilisateurDAO {
         }
     }
 
+
     @Test
     public void testGetUtilisateurByUsername() throws Exception {
 
+        String usernameTest = "test_junit_utilisateur_987654";
+
+        // Récupération d'un utilisateur existant
         List<Utilisateur> utilisateurs = utilisateurDAO.getAllUtilisateurs();
 
-        assertFalse(
-                utilisateurs.isEmpty(),
-                "La table doit contenir au moins un utilisateur"
-        );
+        assertNotNull(utilisateurs,
+                "La liste des utilisateurs ne doit pas être null");
+
+        assertFalse(utilisateurs.isEmpty(),
+                "La table doit contenir au moins un utilisateur");
 
         Utilisateur utilisateurAttendu = utilisateurs.get(0);
 
+        // Recherche par username
         Utilisateur utilisateurTrouve =
                 utilisateurDAO.getUtilisateurByUsername(
                         utilisateurAttendu.getUsername()
                 );
 
-        assertNotNull(
-                utilisateurTrouve,
-                "L'utilisateur doit être retrouvé"
-        );
+        assertNotNull(utilisateurTrouve,
+                "L'utilisateur doit être retrouvé");
 
-        assertEquals(
-                utilisateurAttendu.getUsername(),
-                utilisateurTrouve.getUsername()
-        );
+        // Vérification des informations
+        assertEquals(utilisateurAttendu.getUsername(),
+                utilisateurTrouve.getUsername());
 
-        assertEquals(
-                utilisateurAttendu.getPrenom(),
-                utilisateurTrouve.getPrenom()
-        );
+        assertEquals(utilisateurAttendu.getPassword(),
+                utilisateurTrouve.getPassword());
 
-        assertEquals(
-                utilisateurAttendu.getNom(),
-                utilisateurTrouve.getNom()
-        );
+        assertEquals(utilisateurAttendu.getPrenom(),
+                utilisateurTrouve.getPrenom());
 
-        assertEquals(
-                utilisateurAttendu.isAdmin(),
-                utilisateurTrouve.isAdmin()
-        );
+        assertEquals(utilisateurAttendu.getNom(),
+                utilisateurTrouve.getNom());
+
+        assertEquals(utilisateurAttendu.isAdmin(),
+                utilisateurTrouve.isAdmin());
     }
+
 
     @Test
     public void testGetUtilisateurByUsernameInexistant() throws Exception {
@@ -145,8 +146,7 @@ public class TestUtilisateurDAO {
 
             assertNotNull(utilisateurApresModification);
 
-            assertEquals("NouveauMotDePasse123!",
-                    utilisateurApresModification.getPassword());
+            assertTrue(utilisateurApresModification.getPassword().equals("NouveauMotDePasse123!"));
 
             assertEquals("PrenomModifie",
                     utilisateurApresModification.getPrenom());
