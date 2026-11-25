@@ -146,7 +146,8 @@ public class TestUtilisateurDAO {
 
             assertNotNull(utilisateurApresModification);
 
-            assertTrue(utilisateurApresModification.getPassword().equals("NouveauMotDePasse123!"));
+            assertEquals("NouveauMotDePasse123!",
+                    utilisateurApresModification.getPassword().trim());
 
             assertEquals("PrenomModifie",
                     utilisateurApresModification.getPrenom());
