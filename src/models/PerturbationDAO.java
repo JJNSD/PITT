@@ -152,8 +152,8 @@ public class PerturbationDAO {
 
         try (PreparedStatement ps = connexion.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, perturbation.getLibelle());
-            ps.setString(2, perturbation.getDateHeureDebut().toString());
-            ps.setString(3, perturbation.getDateHeureFin().toString());
+            ps.setObject(2, perturbation.getDateHeureDebut());
+            ps.setObject(3, perturbation.getDateHeureFin());
 
             int perturbationsModifiees = ps.executeUpdate();
 
@@ -183,8 +183,8 @@ public class PerturbationDAO {
         try (PreparedStatement ps = connexion.prepareStatement(query)) {
 
             ps.setString(1, perturbation.getLibelle());
-            ps.setString(2, perturbation.getDateHeureDebut().toString());
-            ps.setString(3, perturbation.getDateHeureFin().toString());
+            ps.setObject(2, perturbation.getDateHeureDebut());
+            ps.setObject(3, perturbation.getDateHeureFin());
             ps.setInt(4, perturbation.getId());
 
             int perturbationsModifiees = ps.executeUpdate();
